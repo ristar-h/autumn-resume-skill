@@ -1,0 +1,1726 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="blue">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>简历编辑器 · 产品经理模板</title>
+  <style>
+    @page { size: A4; margin: 0; }
+    :root, [data-theme="blue"] {
+      --brand: #2458b8; --brand-dark: #1d4ed8; --accent: #244b9b;
+      --text: #1a1a1a; --muted: #5a6472; --band: #f4f6f8; --line: #e3e7ec;
+    }
+    [data-theme="green"] {
+      --brand: #1f7a5c; --brand-dark: #166549; --accent: #1f7a5c;
+      --text: #1a1a1a; --muted: #5a6b63; --band: #f2f7f4; --line: #e0e8e3;
+    }
+    [data-theme="wine"] {
+      --brand: #8c2f39; --brand-dark: #6f232c; --accent: #8c2f39;
+      --text: #21181a; --muted: #6e5f61; --band: #f8f3f3; --line: #eadfe0;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      color: var(--text);
+      font-family: "Songti SC", "SimSun", "宋体", serif;
+      font-size: 10.5pt; line-height: 1.5;
+    }
+
+    /* 工具栏 */
+    .toolbar {
+      position: sticky; z-index: 10; top: 8px;
+      display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+      width: max-content; max-width: calc(100vw - 24px);
+      margin: 8px auto; padding: 7px 10px;
+      border: 1px solid #d3d7df; border-radius: 8px;
+      background: #fff; box-shadow: 0 4px 14px rgba(15,23,42,.12);
+      font: 13px/1 "Microsoft YaHei", sans-serif; color: #334155;
+    }
+    .toolbar .sep { width: 1px; height: 22px; background: #e2e8f0; margin: 0 2px; }
+    .toolbar label { white-space: nowrap; font-size: 12px; color: #64748b; }
+    .toolbar button, .toolbar select {
+      height: 30px; border-radius: 5px; font: inherit;
+      border: 1px solid #cbd5e1; background: #fff; color: #1e293b;
+      cursor: pointer; padding: 0 8px;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+    .toolbar button:hover, .toolbar select:hover { border-color: #7296d8; box-shadow: 0 0 0 2px rgba(36,88,184,.12); }
+    .toolbar .b { font-weight: 700; width: 32px; padding: 0; }
+    .toolbar .color-btn { width: 34px; height: 34px; padding: 2px 4px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; }
+    .toolbar .color-A { font-size: 15px; font-weight: 700; line-height: 1; color: #1e293b; }
+    .toolbar .color-bar { display: block; width: 20px; height: 3px; border-radius: 1px; background: #c0392b; margin-top: 2px; }
+
+    /* 颜色选择器：色板面板 */
+    .color-picker { position: relative; display: inline-flex; }
+    .color-panel {
+      position: absolute; top: 36px; left: 0; z-index: 30;
+      width: 220px; padding: 10px; background: #fff;
+      border: 1px solid #e2e8f0; border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, .16);
+    }
+    .color-panel[hidden] { display: none; }
+    .color-swatches { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    .color-swatch {
+      aspect-ratio: 1; border: 1px solid #e2e8f0; border-radius: 6px;
+      cursor: pointer; padding: 0; transition: transform .1s, border-color .15s, box-shadow .15s;
+    }
+    .color-swatch:hover { transform: scale(1.08); border-color: #7296d8; box-shadow: 0 0 0 2px rgba(36,88,184,.15); }
+    .color-custom {
+      margin-top: 8px; width: 100%; padding: 6px 8px; font-size: 12px;
+      border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; cursor: pointer;
+    }
+    .color-custom:hover { background: #eef2f7; border-color: #7296d8; }
+    .toolbar .primary { border: 1px solid var(--brand); background: var(--brand); color: #fff; font-weight: 700; }
+    .toolbar .primary:hover { background: var(--brand-dark); }
+    .save-status { color: #64748b; white-space: nowrap; font-size: 12px; display: none; }
+    .flash { color: #b91c1c; font-size: 12px; white-space: nowrap; }
+
+    /* 插入 Logo：预设素材面板 */
+    .logo-picker { position: relative; }
+    .logo-panel {
+      position: absolute; top: 36px; left: 0; z-index: 30;
+      width: 272px; padding: 10px; background: #fff;
+      border: 1px solid #e2e8f0; border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, .16);
+      max-height: 62vh; overflow-y: auto;
+    }
+    .logo-panel[hidden] { display: none; }
+    .logo-title { margin: 0 0 8px; font-size: 12px; color: #64748b; }
+    .logo-title--school { margin-top: 12px; }
+    .logo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .logo-item {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;
+      cursor: pointer; padding: 9px; transition: border-color .15s, box-shadow .15s, transform .1s;
+    }
+    .logo-item:hover { border-color: #7296d8; box-shadow: 0 0 0 3px rgba(36, 88, 184, .12); transform: translateY(-1px); }
+    .logo-item img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-upload {
+      width: 100%; margin-top: 8px; height: 30px;
+      border: 1px dashed #cbd5e1; border-radius: 8px; background: #fbfdff;
+      color: #334155; font: 12px/1 "Microsoft YaHei", sans-serif; cursor: pointer;
+    }
+    .logo-upload:hover { border-color: #7296d8; background: #f0f5ff; }
+    /* 环境不支持提示条 */
+    .env-warn {
+      margin: 0; padding: 10px 16px;
+      background: #fff7ed; color: #9a3412;
+      border-bottom: 1px solid #fed7aa;
+      font-size: 13px; line-height: 1.6;
+    }
+    .env-warn[hidden] { display: none; }
+    @media print { .env-warn { display: none !important; } }
+
+    /* 打印/另存为 PDF：纸张与页边距由 .sheet 自身控制，@page 只负责去掉浏览器默认页边距 */
+    @page { size: A4; margin: 0; }
+    @media print {
+      .toolbar { display: none; }
+      /* 关键：强制打印背景色/虚线/伪元素，让导出 PDF 与屏幕所见一致 */
+      *, *::before, *::after {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+      .sheet { box-shadow: none !important; margin: 0 auto !important; min-height: auto !important; }
+      [contenteditable="true"]:focus { outline: none !important; }
+      /* 避免经历条目被拆到两页 */
+      .company, .project-title { break-inside: avoid; break-after: avoid; }
+      .section-title { break-after: avoid; }
+      li { break-inside: avoid; }
+    }
+
+    /* 纸张 */
+    .sheet { width: 210mm; padding: 9mm 11mm 10mm; margin: 0 auto; position: relative; }
+    @media screen {
+      body { background: #eef0f3; padding: 4mm 0 12mm; }
+      .sheet { min-height: 297mm; background: #fff; box-shadow: 0 2px 18px rgba(31,41,55,.18); margin: 0 auto 12mm; }
+    }
+
+    /* A4 分页线：网页上实时显示 PDF 会在哪里断页 */
+    .page-guides { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+    @media print { .page-guides { display: none; } }
+    .page-break-line {
+      position: absolute; left: 0; right: 0; height: 0;
+      border-top: 1px dashed #f0a020;
+    }
+    .page-break-line::after {
+      content: attr(data-label);
+      position: absolute; right: 2mm; top: 2px;
+      font-size: 9px; color: #c97a10; background: #fff8ec;
+      padding: 1px 6px; border-radius: 3px; white-space: nowrap;
+    }
+    .overflow-badge {
+      position: fixed; right: 16px; bottom: 16px; z-index: 60;
+      padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      box-shadow: 0 6px 18px rgba(15,23,42,.18);
+    }
+    .overflow-badge[hidden] { display: none; }
+    .overflow-badge.ok { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .overflow-badge.warn { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    @media print { .overflow-badge { display: none; } }
+    [contenteditable="true"]:focus { outline: 2px solid #b7caf3; outline-offset: 2px; }
+    [contenteditable="false"] { cursor: pointer; }
+
+    /* ===== 公共：头部（单栏默认） + 右上角照片 ===== */
+    .resume-head { display: flex; align-items: flex-start; gap: 14px; }
+    .head-main { flex: 1 1 auto; min-width: 0; }
+    h1 { margin: 0 0 2px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 21pt; line-height: 1.05; font-weight: 700; letter-spacing: .5px; }
+    .objective { margin: 0 0 3px; color: var(--brand-dark); font-size: 11pt; font-weight: 700; }
+    .contact { margin: 0; color: var(--muted); font-size: 9.5pt; line-height: 1.45; }
+    .photo {
+      flex: 0 0 auto; width: 20mm; height: 25mm;
+      border: 1.5px dashed #c3cbd6; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; background: #fafbfc; color: #98a2b3; font-size: 10px;
+    }
+    .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* ===== 公共：分区 ===== */
+    .section { margin-top: 12px; }
+    .section-title {
+      margin: 0 0 6px; padding-bottom: 3px;
+      border-bottom: 2px solid var(--brand);
+      color: var(--brand); font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      font-size: 12pt; line-height: 1.2; font-weight: 700;
+    }
+
+    /* ===== 公共：公司条 + logo ===== */
+    .company { display: flex; align-items: baseline; gap: 8px; margin: 7px 0 4px; padding: 4px 8px; border-radius: 5px; background: var(--band); page-break-inside: avoid; }
+    .company-name { flex: 1; min-width: 0; font-size: 11pt; font-weight: 700; }
+    .company-role { color: var(--accent); font-weight: 700; }
+    .company-meta { color: #3a3a3a; font-size: 9.5pt; white-space: nowrap; }
+    .company-logo { height: 11pt; width: auto; vertical-align: -2pt; margin-right: 4px; border-radius: 2px; }
+
+    /* ===== 公共：项目块 ===== */
+    .project { margin: 6px 0 4px; page-break-inside: avoid; }
+    .project-title { margin: 5px 0 2px; color: var(--accent); font-size: 10.8pt; line-height: 1.25; font-weight: 700; }
+    .project-title .sep-bar { display: inline-block; padding: 0 6px; color: #94a3b8; font-weight: 400; }
+    ul { margin: 2px 0 3px 18px; padding: 0; }
+    li { margin: 2px 0; }
+    li::marker { font-size: .8em; }
+    .label { font-weight: 700; }
+    .skills p { margin: 3px 0; }
+    .summary { margin: 4px 0; line-height: 1.6; }
+
+    /* ===== 模板：double（现代双栏） ===== */
+    .two-col { display: grid; grid-template-columns: 38% 1fr; gap: 14px; align-items: start; }
+    .col-left, .col-right { min-width: 0; }
+    .two-col h1 { font-size: 20pt; margin-bottom: 6px; }
+    .two-col .col-left .photo { width: 24mm; height: 30mm; margin: 0 auto 8px; }
+    .two-col .col-left .contact { margin: 0 0 4px; }
+    .two-col .col-left .section { margin-top: 10px; }
+    .two-col .col-left .section-title { font-size: 11pt; }
+    .two-col .col-left .company { flex-direction: column; gap: 0; align-items: flex-start; }
+    .two-col .col-left .company-role, .two-col .col-left .company-meta { margin-top: 2px; white-space: normal; }
+    .two-col .col-right .objective { margin: 2px 0 10px; }
+
+    /* ===== 模板：tech（技术简历，克制蓝） ===== */
+    .sheet[data-template="tech"] h1 { font-size: 22pt; margin-bottom: 6px; }
+    .sheet[data-template="tech"] .meta { color: var(--muted); font-size: 9.5pt; line-height: 1.55; margin: 2px 0 0; }
+    .sheet[data-template="tech"] .resume-head { display: block; }
+    .sheet[data-template="tech"] .resume-head .photo { display: none; }   /* 仿图1：不放照片 */
+    .sheet[data-template="tech"] .section-title {
+      border-bottom: 1.5px solid var(--brand);
+      color: var(--brand); font-size: 12.5pt; margin-bottom: 5px;
+    }
+    .sheet[data-template="tech"] .summary-line {
+      color: var(--text); font-style: italic; font-weight: 600;
+      margin: 0 0 8px; font-size: 10pt;
+    }
+    .sheet[data-template="tech"] .company {
+      background: transparent; padding: 6px 0 2px; border: 0; border-radius: 0;
+    }
+    .sheet[data-template="tech"] .project-title {
+      color: var(--accent); font-size: 11pt;
+    }
+
+    /* ===== 模板：minimal（简约黑灰） ===== */
+    .sheet[data-template="minimal"] h1 { text-align: center; font-size: 22pt; }
+    .sheet[data-template="minimal"] .contact { text-align: center; }
+    .sheet[data-template="minimal"] .objective { text-align: center; }
+    .sheet[data-template="minimal"] .section-title {
+      border: 0; border-bottom: 1px solid #94a3b8; color: #1a1a1a;
+      font-size: 12pt; background: transparent; padding-bottom: 2px;
+    }
+    .sheet[data-template="minimal"] .company {
+      background: transparent; padding: 5px 0 2px; border: 0; align-items: baseline;
+    }
+    .sheet[data-template="minimal"] .photo { width: 18mm; height: 24mm; }
+    .sheet[data-template="minimal"] .section { margin-top: 10px; }
+    .sheet[data-template="minimal"] ul li::marker { color: #555; }
+
+    /* ===== 模板：block（分块浅色） ===== */
+    .sheet[data-template="block"] .section-title {
+      background: #f1f3f5; padding: 4px 8px; border: 0;
+      border-left: 4px solid var(--brand); font-size: 12pt; color: #1a1a1a;
+      margin: 0 0 6px;
+    }
+    .sheet[data-template="block"] .company { background: transparent; border: 0; padding: 5px 0 2px; }
+
+    /* ===== 模板：corner（折角色块） ===== */
+    .sheet[data-template="corner"] {
+      position: relative;
+      padding-left: 18mm;   /* 给左侧引导虚线让位 */
+    }
+    .sheet[data-template="corner"]::before {
+      content: '';
+      position: absolute;
+      left: 12mm;
+      top: 9mm;
+      bottom: 10mm;
+      border-left: 1px dashed var(--brand);
+      opacity: .45;
+    }
+    .sheet[data-template="corner"] h1 { font-size: 26pt; color: var(--brand); font-weight: 800; letter-spacing: 4px; margin-bottom: 8px; }
+    .sheet[data-template="corner"] .section-title {
+      background: var(--brand); color: #fff;
+      padding: 5px 18px 5px 20px; margin: 0 0 8px; border: 0;
+      display: inline-block; font-size: 12pt; font-weight: 700; letter-spacing: 1px;
+      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
+    }
+    .sheet[data-template="corner"] .section { margin-top: 14px; }
+    .sheet[data-template="corner"] .company { background: transparent; border: 0; padding: 5px 0 2px; }
+    .sheet[data-template="corner"] .photo { width: 22mm; height: 28mm; }
+    .sheet[data-template="corner"] .objective { color: var(--brand-dark); }
+
+    /* ===== 模板：bilingual（中英标题） ===== */
+    .sheet[data-template="bilingual"] .section-title {
+      border: 0; border-bottom: 1.5px solid var(--brand);
+      color: var(--brand); font-size: 13pt; padding-bottom: 2px; margin-bottom: 6px;
+    }
+    /* 英文副标题由 CSS 按 section 的 data-field 生成。
+       不能依赖 DOM 里的 <span class="en">：切换模板时 applyFields 会用用户已有
+       内容整体覆盖 section 的 innerHTML，写在 DOM 里的英文会被冲掉。 */
+    .sheet[data-template="bilingual"] .section > .section-title::after {
+      color: var(--muted); font-style: italic; font-weight: 500;
+      margin-left: 8px; font-size: 10.5pt; letter-spacing: .3px;
+    }
+    .sheet[data-template="bilingual"] .section[data-field="education"] > .section-title::after { content: "Education"; }
+    .sheet[data-template="bilingual"] .section[data-field="experience"] > .section-title::after { content: "Experience"; }
+    .sheet[data-template="bilingual"] .section[data-field="projects"] > .section-title::after { content: "Projects"; }
+    .sheet[data-template="bilingual"] .section[data-field="skills"] > .section-title::after { content: "Skills"; }
+    .sheet[data-template="bilingual"] .section[data-field="summary"] > .section-title::after { content: "Summary"; }
+    .sheet[data-template="bilingual"] .section[data-field="awards"] > .section-title::after { content: "Awards"; }
+    .sheet[data-template="bilingual"] .section[data-field="activities"] > .section-title::after { content: "Activities"; }
+    /* 兼容旧内容里已存在的 <span class="en">（新模板不再写入 DOM） */
+    .sheet[data-template="bilingual"] .section-title .en { display: none; }
+    .sheet[data-template="bilingual"] h1 { font-size: 22pt; }
+    .sheet[data-template="bilingual"] .company-name { color: var(--brand-dark); }
+    .sheet[data-template="bilingual"] .company { background: transparent; padding: 2px 0; border-bottom: 1px dotted #d5dbe4; }
+  </style>
+  <script src="../vendor/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <!-- 无脚本环境提示：IDE / AI 工具的预览面板可能不执行 JS，
+       此时工具栏与导出功能都不可用，需引导用户在系统浏览器中打开。
+       JS 正常时会被脚本立即隐藏。 -->
+  <noscript>
+    <div class="env-warn">
+      当前预览环境未启用 JavaScript，编辑与导出功能不可用。请用系统浏览器打开此 HTML 文件（在文件上右键 →「打开方式」→ 浏览器）。
+    </div>
+  </noscript>
+  <div class="env-warn" id="envWarn" hidden>
+    当前预览环境不支持编辑 / 导出。请用系统浏览器打开此 HTML 文件即可正常使用全部功能。
+  </div>
+
+  <div class="toolbar">
+    <label>版式</label>
+    <select id="layout" title="切换排版样式（内容会保留）">
+      <option value="single">标准单栏</option>
+      <option value="double">左右双栏</option>
+      <option value="tech">无照片项目型</option>
+      <option value="minimal">居中黑白</option>
+      <option value="block">灰底标题</option>
+      <option value="corner">左侧虚线</option>
+      <option value="bilingual">中英标题</option>
+    </select>
+    <label>配色</label>
+    <select id="theme" title="主题色（标题、公司名等强调色）">
+      <option value="blue">深蓝</option>
+      <option value="green">墨绿</option>
+      <option value="wine">酒红</option>
+    </select>
+    <span class="sep"></span>
+    <label>字体</label>
+    <select id="fontFamily" title="作用于选中的文字">
+      <option value="">字体</option>
+      <option value="yahei">微软雅黑</option>
+      <option value="simhei">黑体</option>
+      <option value="simsun">宋体</option>
+      <option value="kaiti">楷体</option>
+    </select>
+    <label>字号</label>
+    <select id="fontSize" title="作用于选中的文字">
+      <option value="">字号</option>
+      <option value="8pt">8</option>
+      <option value="9pt">9</option>
+      <option value="10pt">10</option>
+      <option value="10.5pt">10.5</option>
+      <option value="11pt">11</option>
+      <option value="12pt">12</option>
+      <option value="14pt">14</option>
+      <option value="16pt">16</option>
+      <option value="18pt">18</option>
+    </select>
+    <button class="b" id="boldBtn" type="button" title="加粗选中的文字">B</button>
+    <div class="color-picker">
+      <button class="color-btn" type="button" id="colorBtn" title="改变选中文字颜色">
+        <span class="color-A">A</span>
+        <span class="color-bar" id="colorBar"></span>
+      </button>
+      <div class="color-panel" id="colorPanel" hidden>
+        <div class="color-swatches" id="colorSwatches"></div>
+        <button class="color-custom" id="colorCustomBtn" type="button">自定义颜色…</button>
+      </div>
+    </div>
+    <button id="deleteBtn" type="button" title="删除选中的内容">删除</button>
+    <button id="undoBtn" type="button" title="撤回（Ctrl+Z）">撤回</button>
+    <span class="sep"></span>
+    <div class="logo-picker">
+      <button id="logoBtn" class="primary" type="button" title="在光标处插入 logo">插入 Logo</button>
+      <div class="logo-panel" id="logoPanel" hidden>
+        <p class="logo-title">公司</p>
+        <div class="logo-grid" id="companyGrid"></div>
+        <p class="logo-title logo-title--school">学校</p>
+        <div class="logo-grid" id="schoolGrid"></div>
+        <button id="logoUploadBtn" class="logo-upload" type="button">从本地上传图片…</button>
+      </div>
+    </div>
+    <button id="photoBtn" type="button" title="上传右上角照片">上传照片</button>
+    <span class="flash" id="flash"></span>
+    <button type="button" id="printBtn" title="调用系统打印，在打印对话框里选「另存为 PDF」（适用于导出 PDF 无反应的环境）">打印为 PDF</button>
+    <button class="primary" type="button" id="exportBtn" onclick="exportVectorPDF()">导出 PDF</button>
+    <input type="file" id="logoInput" accept="image/*" hidden>
+    <input type="file" id="photoInput" accept="image/*" hidden>
+  </div>
+
+  <main class="sheet" contenteditable="true" id="sheet" data-template="single">
+    <header class="resume-head">
+      <div class="head-main">
+        <h1 data-field="name">姓名</h1>
+        <div class="objective" data-field="objective">求职意向：目标岗位</div>
+        <div class="contact" data-field="contact">电话　|　邮箱　|　城市</div>
+      </div>
+      <div class="photo" data-field="photo" contenteditable="false" title="点击上传照片">照片</div>
+    </header>
+
+    <section class="section" data-field="education">
+      <h2 class="section-title">教育经历</h2>
+      <div class="company">
+        <div class="company-name">学校名称</div>
+        <div class="company-role">专业 · 学历</div>
+        <div class="company-meta">起止时间</div>
+      </div>
+      <ul>
+        <li>GPA / 排名 / 奖学金等亮点</li>
+      </ul>
+    </section>
+
+    <section class="section" data-field="experience">
+      <h2 class="section-title">实习经历</h2>
+      <div class="company">
+        <div class="company-name">公司名称</div>
+        <div class="company-role">职位</div>
+        <div class="company-meta">起止时间</div>
+      </div>
+      <div class="project-title">项目名称<span class="sep-bar">|</span>项目类型或技术栈</div>
+      <ul>
+        <li>你发现了什么别人没注意到的问题或矛盾（前缀小标签可选，按项目内容自拟）</li>
+        <li>基于这个判断做了什么关键决策、放弃了什么</li>
+        <li>可衡量的结果，以及它验证或推翻了什么假设</li>
+      </ul>
+    </section>
+
+    <section class="section" data-field="projects">
+      <h2 class="section-title">项目经历</h2>
+      <div class="company">
+        <div class="company-name">项目名称</div>
+        <div class="company-role">你的角色</div>
+        <div class="company-meta">起止时间</div>
+      </div>
+      <ul>
+        <li>项目要解决的问题与你的关键判断</li>
+        <li>产出与结果</li>
+      </ul>
+    </section>
+
+    <section class="section" data-field="skills">
+      <h2 class="section-title">技能</h2>
+      <div class="skills">
+        <p><strong>专业能力：</strong>按方向分类列出，如需求分析 · 原型设计 · 数据归因</p>
+        <p><strong>工具：</strong>SQL · Python · Figma 等</p>
+      </div>
+    </section>
+
+    <section class="section" data-field="summary">
+      <h2 class="section-title">个人描述</h2>
+      <p class="summary">一到两句话概括你的差异化优势，避免"沟通能力强""结果导向"这类空话。</p>
+    </section>
+  </main>
+
+  <div class="overflow-badge ok" id="overflowBadge" hidden></div>
+
+  <input type="color" id="color" value="#c0392b" style="position:absolute; opacity:0; width:1px; height:1px; left:-9999px;">
+
+  <script>
+    (() => {
+      const sheet = document.getElementById('sheet');
+      const saveStatus = null;
+      const flashEl = document.getElementById('flash');
+      const contentKey = 'resume-editor-v5';
+      let saveTimer = null, lastRange = null;
+
+      const setStatus = () => {};
+      const flash = (msg) => { flashEl.textContent = msg; clearTimeout(flash._t); flash._t = setTimeout(() => flashEl.textContent = '', 1800); };
+
+      /* 环境自检：IDE / AI 工具的预览面板可能不支持 contenteditable 编辑或
+         localStorage，此时提示用户改用系统浏览器打开，避免以为是文件损坏。 */
+      (() => {
+        const warn = document.getElementById('envWarn');
+        if (!warn) return;
+        let usable = true;
+        // 编辑能力：contenteditable 是否真的生效
+        if (!sheet.isContentEditable) usable = false;
+        // 存储能力：无痕或受限环境下 localStorage 会抛异常
+        try {
+          localStorage.setItem('__probe__', '1');
+          localStorage.removeItem('__probe__');
+        } catch (e) {
+          usable = false;
+        }
+        if (!usable) warn.hidden = false;
+      })();
+
+      /* 自动保存（存之前剔除分页线等运行时注入的辅助节点） */
+      const cleanHTML = () => {
+        const clone = sheet.cloneNode(true);
+        clone.querySelectorAll('.page-guides').forEach(n => n.remove());
+        return clone.innerHTML;
+      };
+      const save = () => { try { localStorage.setItem(contentKey, cleanHTML()); } catch (e) { flash('内容过大，无法自动保存'); } };
+      const scheduleSave = () => { clearTimeout(saveTimer); saveTimer = setTimeout(save, 350); };
+      // 恢复上次编辑。支持两个 URL 参数便于查看原始模板：
+      //   ?fresh=1  跳过恢复，显示模板原始内容（不清缓存）
+      //   ?reset=1  清掉本页缓存后再显示原始内容
+      (() => {
+        const q = new URLSearchParams(location.search);
+        if (q.get('reset') === '1') { try { localStorage.removeItem(contentKey); } catch (e) {} }
+        if (q.get('fresh') === '1' || q.get('reset') === '1') return;
+        const raw = localStorage.getItem(contentKey);
+        if (raw) { try { sheet.innerHTML = raw; setStatus('已恢复上次编辑'); } catch (e) {} }
+      })();
+
+      /* ---------- A4 分页线：网页上实时提示 PDF 会在哪里断页 ---------- */
+      const A4_H_MM = 297;
+      const badge = document.getElementById('overflowBadge');
+      let guides = null;
+
+      const updatePageGuides = () => {
+        // 分页线容器放在 sheet 内（绝对定位相对 sheet），标记为不可编辑，
+        // 且测量高度时先移除它，避免把自身算进内容高度
+        if (guides && guides.isConnected) guides.remove();
+
+        const pxPerMm = sheet.getBoundingClientRect().width / 210;
+        const pageH = A4_H_MM * pxPerMm;
+        const csSheet = getComputedStyle(sheet);
+        // 内容真实高度：最后一个子元素底部 + sheet 的 padding-bottom
+        const kids = Array.from(sheet.children);
+        const sheetTop = sheet.getBoundingClientRect().top;
+        let contentBottom = 0;
+        kids.forEach(k => {
+          const r = k.getBoundingClientRect();
+          contentBottom = Math.max(contentBottom, r.bottom - sheetTop);
+        });
+        const contentH = contentBottom + parseFloat(csSheet.paddingBottom || 0);
+        const pages = Math.max(1, Math.ceil(contentH / pageH - 0.002));
+
+        if (!guides) {
+          guides = document.createElement('div');
+          guides.className = 'page-guides';
+          guides.contentEditable = 'false';
+          guides.setAttribute('aria-hidden', 'true');
+        }
+        guides.innerHTML = '';
+        for (let i = 1; i < pages; i++) {
+          const line = document.createElement('div');
+          line.className = 'page-break-line';
+          line.style.top = (pageH * i) + 'px';
+          line.dataset.label = '第 ' + i + ' 页结束 · PDF 在此断页';
+          guides.appendChild(line);
+        }
+        sheet.appendChild(guides);
+
+        if (pages > 1) {
+          const usedOnLast = (contentH - pageH * (pages - 1)) / pxPerMm;
+          badge.className = 'overflow-badge warn';
+          badge.textContent = `共 ${pages} 页 · 末页已用 ${usedOnLast.toFixed(0)}mm`;
+        } else {
+          const leftMm = (pageH - contentH) / pxPerMm;
+          badge.className = 'overflow-badge ok';
+          badge.textContent = `单页 A4 · 还剩 ${leftMm.toFixed(0)}mm`;
+        }
+        badge.hidden = false;
+      };
+
+      const scheduleGuides = (() => {
+        let t = null;
+        return () => { clearTimeout(t); t = setTimeout(updatePageGuides, 180); };
+      })();
+
+      /* ---------- 撤回 / 重做 ---------- */
+      const MAX_UNDO = 200;
+      let undoStack = [], redoStack = [], composing = false;
+      // 快照统一用 cleanHTML()，不把运行时注入的分页线存进历史
+      let lastSnapshot = cleanHTML();
+
+      const commit = () => {
+        const cur = cleanHTML();
+        if (cur === lastSnapshot) return;
+        undoStack.push(lastSnapshot);
+        if (undoStack.length > MAX_UNDO) undoStack.shift();
+        lastSnapshot = cur;
+        redoStack.length = 0;
+      };
+      const undo = () => {
+        if (!undoStack.length) { flash('没有可撤回的操作'); return; }
+        redoStack.push(cleanHTML());
+        const prev = undoStack.pop();
+        lastSnapshot = prev;
+        sheet.innerHTML = prev;
+        guides = null;
+        lastRange = null;
+        scheduleSave();
+        scheduleGuides();
+      };
+      const redo = () => {
+        if (!redoStack.length) return;
+        undoStack.push(cleanHTML());
+        const next = redoStack.pop();
+        lastSnapshot = next;
+        sheet.innerHTML = next;
+        guides = null;
+        lastRange = null;
+        scheduleSave();
+        scheduleGuides();
+      };
+
+      sheet.addEventListener('compositionstart', () => composing = true);
+      sheet.addEventListener('compositionend', () => { composing = false; commit(); scheduleSave(); });
+      sheet.addEventListener('input', () => { scheduleSave(); scheduleGuides(); if (!composing) commit(); });
+      window.addEventListener('beforeunload', save);
+
+      document.addEventListener('keydown', (e) => {
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'SELECT' || t.tagName === 'TEXTAREA')) return;
+        // Backspace / Delete：折叠光标紧邻已插入的 logo 图片时，主动删除该图片
+        if ((e.key === 'Backspace' || e.key === 'Delete') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          const sel = window.getSelection();
+          if (sel.rangeCount) {
+            const r = sel.getRangeAt(0);
+            if (r.collapsed && sheet.contains(r.commonAncestorContainer)) {
+              const findAdjacentLogo = (node, offset, dir) => {
+                // dir=-1 向前找（Backspace），dir=+1 向后找（Delete）
+                if (node.nodeType === Node.TEXT_NODE) {
+                  if (dir < 0 && offset === 0) {
+                    // 光标在文本节点开头 → 看它前一个兄弟
+                    let prev = node.previousSibling;
+                    while (prev && prev.nodeType === Node.TEXT_NODE && prev.nodeValue === '') prev = prev.previousSibling;
+                    return prev && prev.nodeType === Node.ELEMENT_NODE && prev.classList && prev.classList.contains('company-logo') ? prev : null;
+                  }
+                  if (dir > 0 && offset === node.nodeValue.length) {
+                    let next = node.nextSibling;
+                    while (next && next.nodeType === Node.TEXT_NODE && next.nodeValue === '') next = next.nextSibling;
+                    return next && next.nodeType === Node.ELEMENT_NODE && next.classList && next.classList.contains('company-logo') ? next : null;
+                  }
+                  return null;
+                }
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                  const kids = node.childNodes;
+                  if (dir < 0 && offset > 0) {
+                    const cand = kids[offset - 1];
+                    return cand && cand.nodeType === Node.ELEMENT_NODE && cand.classList && cand.classList.contains('company-logo') ? cand : null;
+                  }
+                  if (dir > 0 && offset < kids.length) {
+                    const cand = kids[offset];
+                    return cand && cand.nodeType === Node.ELEMENT_NODE && cand.classList && cand.classList.contains('company-logo') ? cand : null;
+                  }
+                }
+                return null;
+              };
+              const dir = e.key === 'Backspace' ? -1 : 1;
+              const logo = findAdjacentLogo(r.startContainer, r.startOffset, dir);
+              if (logo) {
+                e.preventDefault();
+                const parent = logo.parentNode;
+                const ref = dir < 0 ? logo.previousSibling : logo.nextSibling;
+                parent.removeChild(logo);
+                const range = document.createRange();
+                if (ref && ref.nodeType === Node.TEXT_NODE) {
+                  range.setStart(ref, dir < 0 ? ref.nodeValue.length : 0);
+                } else if (ref) {
+                  dir < 0 ? range.setStartAfter(ref) : range.setStartBefore(ref);
+                } else {
+                  range.setStart(parent, dir < 0 ? parent.childNodes.length : 0);
+                }
+                range.collapse(true);
+                sel.removeAllRanges(); sel.addRange(range);
+                commit(); scheduleSave();
+                return;
+              }
+            }
+          }
+        }
+        if (!(e.ctrlKey || e.metaKey)) return;
+        const k = e.key.toLowerCase();
+        if (k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+        else if (k === 'y') { e.preventDefault(); redo(); }
+      });
+
+      /* ---------- 选区 + 工具栏回显 ---------- */
+      const fontSelect = document.getElementById('fontFamily');
+      const sizeSelect = document.getElementById('fontSize');
+      const fontMap = {
+        yahei: '"Microsoft YaHei", "PingFang SC", sans-serif',
+        simhei: '"SimHei", "黑体", sans-serif',
+        simsun: '"SimSun", "宋体", serif',
+        kaiti: '"KaiTi", "楷体", serif'
+      };
+
+      document.addEventListener('selectionchange', () => {
+        const sel = window.getSelection();
+        if (!sel.rangeCount) return;
+        const r = sel.getRangeAt(0);
+        if (!sheet.contains(r.commonAncestorContainer)) return;
+        lastRange = r.cloneRange();
+        syncToolbar(r.startContainer);
+      });
+
+      function syncToolbar(node) {
+        const el = node.nodeType === 3 ? node.parentElement : node;
+        if (!el || !sheet.contains(el)) return;
+        const cs = getComputedStyle(el);
+        const px = parseFloat(cs.fontSize);
+        const pt = Math.round(px * 3 / 4 * 10) / 10;
+        const sizes = [8, 9, 10, 10.5, 11, 12, 14, 16, 18];
+        let best = null, bestDiff = 1e9;
+        sizes.forEach(s => { const d = Math.abs(s - pt); if (d < bestDiff) { bestDiff = d; best = s; } });
+        sizeSelect.value = best === null ? '' : best + 'pt';
+        const fam = cs.fontFamily.toLowerCase();
+        let fv = '';
+        if (fam.includes('microsoft yahei') || fam.includes('pingfang')) fv = 'yahei';
+        else if (fam.includes('simhei') || fam.includes('黑体')) fv = 'simhei';
+        else if (fam.includes('simsun') || fam.includes('宋体')) fv = 'simsun';
+        else if (fam.includes('kaiti') || fam.includes('楷体')) fv = 'kaiti';
+        fontSelect.value = fv;
+      }
+
+      const restoreSelection = () => {
+        const sel = window.getSelection();
+        if (sel.rangeCount) {
+          const r = sel.getRangeAt(0);
+          if (sheet.contains(r.commonAncestorContainer)) {
+            lastRange = r.cloneRange();
+            return true;
+          }
+        }
+        if (!lastRange) return false;
+        sel.removeAllRanges(); sel.addRange(lastRange);
+        return true;
+      };
+
+      /* ---------- 选区级操作 ---------- */
+      const wrapSelection = (styleObj) => {
+        if (!restoreSelection()) { flash('请先在简历里选中要改的文字'); return false; }
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        if (range.collapsed) { flash('请先选中文字（不是光标）'); return false; }
+        const span = document.createElement('span');
+        Object.assign(span.style, styleObj);
+        try { range.surroundContents(span); }
+        catch (e) {
+          const frag = range.extractContents();
+          span.appendChild(frag);
+          range.insertNode(span);
+        }
+        const nr = document.createRange();
+        nr.selectNodeContents(span);
+        sel.removeAllRanges(); sel.addRange(nr);
+        commit(); scheduleSave();
+        return true;
+      };
+
+      fontSelect.addEventListener('change', (e) => {
+        const v = e.target.value; if (!v) return;
+        wrapSelection({ fontFamily: fontMap[v] });
+      });
+      sizeSelect.addEventListener('change', (e) => {
+        const v = e.target.value; if (!v) return;
+        wrapSelection({ fontSize: v });
+      });
+      document.getElementById('boldBtn').addEventListener('click', () => {
+        if (!restoreSelection() || window.getSelection().getRangeAt(0).collapsed) { flash('请先选中要加粗的文字'); return; }
+        document.execCommand('bold');
+        commit(); scheduleSave();
+      });
+      document.getElementById('deleteBtn').addEventListener('click', () => {
+        if (!restoreSelection() || window.getSelection().getRangeAt(0).collapsed) { flash('请先选中要删除的内容'); return; }
+        document.execCommand('delete');
+        commit(); scheduleSave();
+      });
+      document.getElementById('undoBtn').addEventListener('click', undo);
+
+      const colorInput = document.getElementById('color');
+      const colorBar = document.getElementById('colorBar');
+      const colorPanel = document.getElementById('colorPanel');
+      const colorPicker = document.querySelector('.color-picker');
+      const colorSwatches = document.getElementById('colorSwatches');
+
+      const PRESET_COLORS = [
+        '#111827', '#334155', '#64748b', '#94a3b8', '#dc2626', '#ea580c',
+        '#d97706', '#65a30d', '#059669', '#0891b2', '#2563eb', '#7c3aed',
+      ];
+      const applyColor = (hex) => {
+        if (!restoreSelection() || window.getSelection().getRangeAt(0).collapsed) {
+          flash('请先选中要改色的文字'); return;
+        }
+        colorBar.style.background = hex;
+        wrapSelection({ color: hex });
+      };
+      PRESET_COLORS.forEach(hex => {
+        const sw = document.createElement('button');
+        sw.type = 'button'; sw.className = 'color-swatch'; sw.title = hex;
+        sw.style.background = hex;
+        sw.addEventListener('mousedown', (e) => e.preventDefault());
+        sw.addEventListener('click', () => { applyColor(hex); colorPanel.hidden = true; });
+        colorSwatches.appendChild(sw);
+      });
+      document.getElementById('colorBtn').addEventListener('mousedown', (e) => e.preventDefault());
+      document.getElementById('colorBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const sel = window.getSelection();
+        if (sel.rangeCount) {
+          const r = sel.getRangeAt(0);
+          if (sheet.contains(r.commonAncestorContainer)) lastRange = r.cloneRange();
+        }
+        colorPanel.hidden = !colorPanel.hidden;
+      });
+      document.getElementById('colorCustomBtn').addEventListener('mousedown', (e) => e.preventDefault());
+      document.getElementById('colorCustomBtn').addEventListener('click', () => { colorInput.click(); });
+      colorInput.addEventListener('input', (e) => { applyColor(e.target.value); colorPanel.hidden = true; });
+      document.addEventListener('click', (e) => {
+        if (!colorPicker.contains(e.target)) colorPanel.hidden = true;
+      });
+
+      /* ---------- 照片 / logo ---------- */
+      /* 打印为 PDF：走系统打印对话框选「另存为 PDF」。
+         IDE / AI 工具的 webview 常拦掉 blob 下载导致「导出 PDF」无反应，
+         打印通道兼容性更好，且渲染由浏览器负责、与网页所见完全一致。 */
+      document.getElementById('printBtn').addEventListener('click', () => {
+        try {
+          window.print();
+        } catch (e) {
+          flash('当前环境不支持打印，请在浏览器中打开此文件');
+        }
+      });
+
+      const readImage = (file, cb) => {
+        const reader = new FileReader();
+        reader.onload = () => cb(reader.result);
+        reader.readAsDataURL(file);
+      };
+      document.addEventListener('click', (e) => {
+        if (e.target.closest && e.target.closest('.photo')) document.getElementById('photoInput').click();
+      });
+      document.getElementById('photoBtn').addEventListener('click', () => document.getElementById('photoInput').click());
+      document.getElementById('photoInput').addEventListener('change', (e) => {
+        const f = e.target.files[0]; if (!f) return;
+        readImage(f, (data) => {
+          const slot = sheet.querySelector('.photo');
+          if (!slot) return;
+          slot.innerHTML = '';
+          const img = document.createElement('img');
+          img.src = data; img.alt = '照片';
+          slot.appendChild(img);
+          commit(); scheduleSave();
+        });
+        e.target.value = '';
+      });
+
+      /* ---------- 预设 logo 素材（复刻 asu-skills/assets/logos） ---------- */
+      const svgToDataUri = (svg) => 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+            const COMPANY_LOGOS = [
+          { name: 'Claude', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>' },
+          { name: 'OpenAI', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#412991" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"/></svg>' },
+          { name: 'Anthropic', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#191919" d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>' },
+          { name: 'Google', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#4285F4" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg>' },
+          { name: 'Google Gemini', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#8E75B2" d="M11.04 19.32Q12 21.51 12 24q0-2.49.93-4.68.96-2.19 2.58-3.81t3.81-2.55Q21.51 12 24 12q-2.49 0-4.68-.93a12.3 12.3 0 0 1-3.81-2.58 12.3 12.3 0 0 1-2.58-3.81Q12 2.49 12 0q0 2.49-.96 4.68-.93 2.19-2.55 3.81a12.3 12.3 0 0 1-3.81 2.58Q2.49 12 0 12q2.49 0 4.68.96 2.19.93 3.81 2.55t2.55 3.81"/></svg>' },
+          { name: 'GitHub', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#181717" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>' },
+          { name: 'Meta', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#0467DF" d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"/></svg>' },
+          { name: 'Apple', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#000000" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></svg>' },
+          { name: 'Amazon', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF9900" d="M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.743-2.64 1.316-4.185 1.726a17.617 17.617 0 01-10.951-.577 17.88 17.88 0 01-5.43-3.35c-.1-.074-.151-.15-.151-.22 0-.047.021-.09.051-.13zm6.565-6.218c0-1.005.247-1.863.743-2.577.495-.71 1.17-1.25 2.04-1.615.796-.335 1.756-.575 2.912-.72.39-.046 1.033-.103 1.92-.174v-.37c0-.93-.105-1.558-.3-1.875-.302-.43-.78-.65-1.44-.65h-.182c-.48.046-.896.196-1.246.46-.35.27-.575.63-.675 1.096-.06.3-.206.465-.435.51l-2.52-.315c-.248-.06-.372-.18-.372-.39 0-.046.007-.09.022-.15.247-1.29.855-2.25 1.82-2.88.976-.616 2.1-.975 3.39-1.05h.54c1.65 0 2.957.434 3.888 1.29.135.15.27.3.405.48.12.165.224.314.283.45.075.134.15.33.195.57.06.254.105.42.135.51.03.104.062.3.076.615.01.313.02.493.02.553v5.28c0 .376.06.72.165 1.036.105.313.21.54.315.674l.51.674c.09.136.136.256.136.36 0 .12-.06.226-.18.314-1.2 1.05-1.86 1.62-1.963 1.71-.165.135-.375.15-.63.045a6.062 6.062 0 01-.526-.496l-.31-.347a9.391 9.391 0 01-.317-.42l-.3-.435c-.81.886-1.603 1.44-2.4 1.665-.494.15-1.093.227-1.83.227-1.11 0-2.04-.343-2.76-1.034-.72-.69-1.08-1.665-1.08-2.94l-.05-.076zm3.753-.438c0 .566.14 1.02.425 1.364.285.34.675.512 1.155.512.045 0 .106-.007.195-.02.09-.016.134-.023.166-.023.614-.16 1.08-.553 1.424-1.178.165-.28.285-.58.36-.91.09-.32.12-.59.135-.8.015-.195.015-.54.015-1.005v-.54c-.84 0-1.484.06-1.92.18-1.275.36-1.92 1.17-1.92 2.43l-.035-.02zm9.162 7.027c.03-.06.075-.11.132-.17.362-.243.714-.41 1.05-.5a8.094 8.094 0 011.612-.24c.14-.012.28 0 .41.03.65.06 1.05.168 1.172.33.063.09.099.228.099.39v.15c0 .51-.149 1.11-.424 1.8-.278.69-.664 1.248-1.156 1.68-.073.06-.14.09-.197.09-.03 0-.06 0-.09-.012-.09-.044-.107-.12-.064-.24.54-1.26.806-2.143.806-2.64 0-.15-.03-.27-.087-.344-.145-.166-.55-.257-1.224-.257-.243 0-.533.016-.87.046-.363.045-.7.09-1 .135-.09 0-.148-.014-.18-.044-.03-.03-.036-.047-.02-.077 0-.017.006-.03.02-.063v-.06z"/></svg>' },
+          { name: 'Netflix', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#E50914" d="m5.398 0 8.348 23.602c2.346.059 4.856.398 4.856.398L10.113 0H5.398zm8.489 0v9.172l4.715 13.33V0h-4.715zM5.398 1.5V24c1.873-.225 2.81-.312 4.715-.398V14.83L5.398 1.5z"/></svg>' },
+          { name: 'Spotify', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#1ED760" d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>' },
+          { name: 'YouTube', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>' },
+          { name: 'Notion', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#000000" d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933zM1.936 1.035l13.31-.98c1.634-.14 2.055-.047 3.082.7l4.249 2.986c.7.513.934.653.934 1.213v16.378c0 1.026-.373 1.634-1.68 1.726l-15.458.934c-.98.047-1.448-.093-1.962-.747l-3.129-4.06c-.56-.747-.793-1.306-.793-1.96V2.667c0-.839.374-1.54 1.447-1.632z"/></svg>' },
+          { name: 'Figma', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#F24E1E" d="M15.852 8.981h-4.588V0h4.588c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.491-4.49 4.491zM12.735 7.51h3.117c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-3.117V7.51zm0 1.471H8.148c-2.476 0-4.49-2.014-4.49-4.49S5.672 0 8.148 0h4.588v8.981zm-4.587-7.51c-1.665 0-3.019 1.355-3.019 3.019s1.354 3.02 3.019 3.02h3.117V1.471H8.148zm4.587 15.019H8.148c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h4.588v8.98zM8.148 8.981c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h3.117V8.981H8.148zM8.172 24c-2.489 0-4.515-2.014-4.515-4.49s2.014-4.49 4.49-4.49h4.588v4.441c0 2.503-2.047 4.539-4.563 4.539zm-.024-7.51a3.023 3.023 0 0 0-3.019 3.019c0 1.665 1.365 3.019 3.044 3.019 1.705 0 3.093-1.376 3.093-3.068v-2.97H8.148zm7.704 0h-.098c-2.476 0-4.49-2.014-4.49-4.49s2.014-4.49 4.49-4.49h.098c2.476 0 4.49 2.014 4.49 4.49s-2.014 4.49-4.49 4.49zm-.097-7.509c-1.665 0-3.019 1.355-3.019 3.019s1.355 3.019 3.019 3.019h.098c1.665 0 3.019-1.355 3.019-3.019s-1.355-3.019-3.019-3.019h-.098z"/></svg>' },
+          { name: 'Airbnb', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF5A5F" d="M12.001 18.275c-1.353-1.697-2.148-3.184-2.413-4.457-.263-1.027-.16-1.848.291-2.465.477-.71 1.188-1.056 2.121-1.056s1.643.345 2.12 1.063c.446.61.558 1.432.286 2.465-.291 1.298-1.085 2.785-2.412 4.458zm9.601 1.14c-.185 1.246-1.034 2.28-2.2 2.783-2.253.98-4.483-.583-6.392-2.704 3.157-3.951 3.74-7.028 2.385-9.018-.795-1.14-1.933-1.695-3.394-1.695-2.944 0-4.563 2.49-3.927 5.382.37 1.565 1.352 3.343 2.917 5.332-.98 1.085-1.91 1.856-2.732 2.333-.636.344-1.245.558-1.828.609-2.679.399-4.778-2.2-3.825-4.88.132-.345.395-.98.845-1.961l.025-.053c1.464-3.178 3.242-6.79 5.285-10.795l.053-.132.58-1.116c.45-.822.635-1.19 1.351-1.643.346-.21.77-.315 1.246-.315.954 0 1.698.558 2.016 1.007.158.239.345.557.582.953l.558 1.089.08.159c2.041 4.004 3.821 7.608 5.279 10.794l.026.025.533 1.22.318.764c.243.613.294 1.222.213 1.858zm1.22-2.39c-.186-.583-.505-1.271-.9-2.094v-.03c-1.889-4.006-3.642-7.608-5.307-10.844l-.111-.163C15.317 1.461 14.468 0 12.001 0c-2.44 0-3.476 1.695-4.535 3.898l-.081.16c-1.669 3.236-3.421 6.843-5.303 10.847v.053l-.559 1.22c-.21.504-.317.768-.345.847C-.172 20.74 2.611 24 5.98 24c.027 0 .132 0 .265-.027h.372c1.75-.213 3.554-1.325 5.384-3.317 1.829 1.989 3.635 3.104 5.382 3.317h.372c.133.027.239.027.265.027 3.37.003 6.152-3.261 4.802-6.975z"/></svg>' },
+          { name: 'Uber', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#000000" d="M0 7.97v4.958c0 1.867 1.302 3.101 3 3.101.826 0 1.562-.316 2.094-.87v.736H6.27V7.97H5.082v4.888c0 1.257-.85 2.106-1.947 2.106-1.11 0-1.946-.827-1.946-2.106V7.971H0zm7.44 0v7.925h1.13v-.725c.521.532 1.257.86 2.06.86a3.006 3.006 0 0 0 3.034-3.01 3.01 3.01 0 0 0-3.033-3.024 2.86 2.86 0 0 0-2.049.861V7.971H7.439zm9.869 2.038c-1.687 0-2.965 1.37-2.965 3 0 1.72 1.334 3.01 3.066 3.01 1.053 0 1.913-.463 2.49-1.233l-.826-.611c-.43.577-.996.847-1.664.847-.973 0-1.753-.7-1.912-1.64h4.697v-.373c0-1.72-1.222-3-2.886-3zm6.295.068c-.634 0-1.098.294-1.381.758v-.713h-1.131v5.774h1.142V12.61c0-.894.544-1.47 1.291-1.47H24v-1.065h-.396zm-6.319.928c.85 0 1.564.588 1.756 1.47H15.52c.203-.882.916-1.47 1.765-1.47zm-6.732.012c1.086 0 1.98.883 1.98 2.004a1.993 1.993 0 0 1-1.98 2.001A1.989 1.989 0 0 1 8.56 13.02a1.99 1.99 0 0 1 1.992-2.004z"/></svg>' },
+          { name: 'Discord', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#5865F2" d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>' },
+          { name: 'X (Twitter)', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#000000" d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg>' },
+          { name: 'Instagram', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF0069" d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg>' },
+          { name: 'NVIDIA', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#76B900" d="M8.948 8.798v-1.43a6.7 6.7 0 0 1 .424-.018c3.922-.124 6.493 3.374 6.493 3.374s-2.774 3.851-5.75 3.851c-.398 0-.787-.062-1.158-.185v-4.346c1.528.185 1.837.857 2.747 2.385l2.04-1.714s-1.492-1.952-4-1.952a6.016 6.016 0 0 0-.796.035m0-4.735v2.138l.424-.027c5.45-.185 9.01 4.47 9.01 4.47s-4.08 4.964-8.33 4.964c-.37 0-.733-.035-1.095-.097v1.325c.3.035.61.062.91.062 3.957 0 6.82-2.023 9.593-4.408.459.371 2.34 1.263 2.73 1.652-2.633 2.208-8.772 3.984-12.253 3.984-.335 0-.653-.018-.971-.053v1.864H24V4.063zm0 10.326v1.131c-3.657-.654-4.673-4.46-4.673-4.46s1.758-1.944 4.673-2.262v1.237H8.94c-1.528-.186-2.73 1.245-2.73 1.245s.68 2.412 2.739 3.11M2.456 10.9s2.164-3.197 6.5-3.533V6.201C4.153 6.59 0 10.653 0 10.653s2.35 6.802 8.948 7.42v-1.237c-4.84-.6-6.492-5.936-6.492-5.936z"/></svg>' },
+          { name: 'Slack', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#4A154B" d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>' },
+          { name: 'Tesla', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#CC0000" d="M12 5.362l2.475-3.026s4.245.09 8.471 2.054c-1.082 1.636-3.231 2.438-3.231 2.438-.146-1.439-1.154-1.79-4.354-1.79L12 24 8.619 5.034c-3.18 0-4.188.354-4.335 1.792 0 0-2.146-.795-3.229-2.43C5.28 2.431 9.525 2.34 9.525 2.34L12 5.362l-.004.002H12v-.002zm0-3.899c3.415-.03 7.326.528 11.328 2.28.535-.968.672-1.395.672-1.395C19.625.612 15.528.015 12 0 8.472.015 4.375.61 0 2.349c0 0 .195.525.672 1.396C4.674 1.989 8.585 1.435 12 1.46v.003z"/></svg>' },
+          { name: 'Twitch', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#9146FF" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>' },
+          { name: 'Reddit', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF4500" d="M12 0C5.373 0 0 5.373 0 12c0 3.314 1.343 6.314 3.515 8.485l-2.286 2.286C.775 23.225 1.097 24 1.738 24H12c6.627 0 12-5.373 12-12S18.627 0 12 0Zm4.388 3.199c1.104 0 1.999.895 1.999 1.999 0 1.105-.895 2-1.999 2-.946 0-1.739-.657-1.947-1.539v.002c-1.147.162-2.032 1.15-2.032 2.341v.007c1.776.067 3.4.567 4.686 1.363.473-.363 1.064-.58 1.707-.58 1.547 0 2.802 1.254 2.802 2.802 0 1.117-.655 2.081-1.601 2.531-.088 3.256-3.637 5.876-7.997 5.876-4.361 0-7.905-2.617-7.998-5.87-.954-.447-1.614-1.415-1.614-2.538 0-1.548 1.255-2.802 2.803-2.802.645 0 1.239.218 1.712.585 1.275-.79 2.881-1.291 4.64-1.365v-.01c0-1.663 1.263-3.034 2.88-3.207.188-.911.993-1.595 1.959-1.595Zm-8.085 8.376c-.784 0-1.459.78-1.506 1.797-.047 1.016.64 1.429 1.426 1.429.786 0 1.371-.369 1.418-1.385.047-1.017-.553-1.841-1.338-1.841Zm7.406 0c-.786 0-1.385.824-1.338 1.841.047 1.017.634 1.385 1.418 1.385.785 0 1.473-.413 1.426-1.429-.046-1.017-.721-1.797-1.506-1.797Zm-3.703 4.013c-.974 0-1.907.048-2.77.135-.147.015-.241.168-.183.305.483 1.154 1.622 1.964 2.953 1.964 1.33 0 2.47-.81 2.953-1.964.057-.137-.037-.29-.184-.305-.863-.087-1.795-.135-2.769-.135Z"/></svg>' },
+          { name: 'Stack Overflow', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#F58025" d="M15.725 0l-1.72 1.277 6.39 8.588 1.716-1.277L15.725 0zm-3.94 3.418l-1.369 1.644 8.225 6.85 1.369-1.644-8.225-6.85zm-3.15 4.465l-.905 1.94 9.702 4.517.904-1.94-9.701-4.517zm-1.85 4.86l-.44 2.093 10.473 2.201.44-2.092-10.473-2.203zM1.89 15.47V24h19.19v-8.53h-2.133v6.397H4.021v-6.396H1.89zm4.265 2.133v2.13h10.66v-2.13H6.154Z"/></svg>' },
+          { name: '腾讯 QQ', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#1EBAFC" d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.526 4.632 17.351 0 12 0S4.474 4.632 4.474 9.241c0 .274.013.804.014.836l-1.08 2.695a39 39 0 0 0-.802 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 2.394 4.771-.612.188-1.363.479-1.845.835-.434.32-.379.646-.301.778.343.578 5.883.369 7.482.189 1.6.18 7.14.389 7.483-.189.078-.132.132-.458-.301-.778-.483-.356-1.233-.646-1.846-.836 1.637-1.384 2.393-3.302 2.393-4.771 0 0 1.563 2.537 2.103 2.472.251-.03.581-1.39-.438-4.673"/></svg>' },
+          { name: '字节跳动', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#3C8CFF" d="M19.8772 1.4685L24 2.5326v18.9426l-4.1228 1.0563V1.4685zm-13.3481 9.428l4.115 1.0641v8.9786l-4.115 1.0642v-11.107zM0 2.572l4.115 1.0642v16.7354L0 21.428V2.572zm17.4553 5.6205v11.107l-4.1228-1.0642V9.2568l4.1228-1.0642z"/></svg>' },
+          { name: '阿里巴巴', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF6A00" d="M14.391 16.22c-.963.044-.865-.459-.302-1.234 1.32-1.768 3.82-4.236 3.906-5.982.151-2.283-2.143-3.026-4.501-3.004-1.645.022-3.344.492-4.501.906C5 8.315 2.489 10.576.909 13.076-.768 15.554-.216 17.923 3.322 18c2.716-.109 4.48-.862 6.32-1.802.01 0-5.086 1.453-6.958.383l-.008-.002c-.193-.11-.404-.264-.457-.683-.012-.885 1.46-1.802 2.283-2.097v-1.533a5.374 5.374 0 0 0 1.955.366 5.378 5.378 0 0 0 3.472-1.265c.037.13.056.278.044.447h.371c.048-.394-.172-.706-.172-.706-.333-.529-.915-.52-.915-.52s.315.137.529.466a4.953 4.953 0 0 1-4.665.932l1.21-1.2-.336-.874c2.435-.852 4.48-1.507 7.812-2.085l-.746-.624.389-.24c2.01.568 3.325.985 3.253 2.051a2.672 2.672 0 0 1-.202.611c-.584 1.158-2.326 3.09-3.029 3.898-.465.535-.92 1.06-1.245 1.562-.335.503-.54.971-.551 1.42.043 3.504 10.334-1.64 12.324-3.003-2.943 1.266-6.113 2.489-9.609 2.718Z"/></svg>' },
+          { name: '阿里云', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF6A00" d="M3.996 4.517h5.291L8.01 6.324 4.153 7.506a1.668 1.668 0 0 0-1.165 1.601v5.786a1.668 1.668 0 0 0 1.165 1.6l3.857 1.183 1.277 1.807H3.996A3.996 3.996 0 0 1 0 15.487V8.513a3.996 3.996 0 0 1 3.996-3.996m16.008 0h-5.291l1.277 1.807 3.857 1.182c.715.227 1.17.889 1.165 1.601v5.786a1.668 1.668 0 0 1-1.165 1.6l-3.857 1.183-1.277 1.807h5.291A3.996 3.996 0 0 0 24 15.487V8.513a3.996 3.996 0 0 0-3.996-3.996m-4.007 8.345H8.002v-1.804h7.995Z"/></svg>' },
+          { name: '百度', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#2932E1" d="M9.154 0C7.71 0 6.54 1.658 6.54 3.707c0 2.051 1.171 3.71 2.615 3.71 1.446 0 2.614-1.659 2.614-3.71C11.768 1.658 10.6 0 9.154 0zm7.025.594C14.86.58 13.347 2.589 13.2 3.927c-.187 1.745.25 3.487 2.179 3.735 1.933.25 3.175-1.806 3.422-3.364.252-1.555-.995-3.364-2.362-3.674a1.218 1.218 0 0 0-.261-.03zM3.582 5.535a2.811 2.811 0 0 0-.156.008c-2.118.19-2.428 3.24-2.428 3.24-.287 1.41.686 4.425 3.297 3.864 2.617-.561 2.262-3.68 2.183-4.362-.125-1.018-1.292-2.773-2.896-2.75zm16.534 1.753c-2.308 0-2.617 2.119-2.617 3.616 0 1.43.121 3.425 2.988 3.362 2.867-.063 2.553-3.238 2.553-3.988 0-.745-.62-2.99-2.924-2.99zm-8.264 2.478c-1.424.014-2.708.925-3.323 1.947-1.118 1.868-2.863 3.05-3.112 3.363-.25.309-3.61 2.116-2.864 5.42.746 3.301 3.365 3.237 3.365 3.237s1.93.19 4.171-.31c2.24-.495 4.17.123 4.17.123s5.233 1.748 6.665-1.616c1.43-3.364-.808-5.109-.808-5.109s-2.99-2.306-4.736-4.798c-1.072-1.665-2.348-2.268-3.528-2.257zm-2.234 3.84l1.542.024v8.197H7.758c-1.47-.291-2.055-1.292-2.13-1.462-.072-.173-.488-.976-.268-2.343.635-2.049 2.447-2.196 2.447-2.196h1.81zm3.964 2.39v3.881c.096.413.612.488.612.488h1.614v-4.343h1.689v5.782h-3.915c-1.517-.39-1.59-1.465-1.59-1.465v-4.317zm-5.458 1.147c-.66.197-.978.708-1.05.928-.076.22-.247.78-.1 1.269.294 1.095 1.248 1.144 1.248 1.144h1.37v-3.34z"/></svg>' },
+          { name: '华为', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF0000" d="M3.67 6.14S1.82 7.91 1.72 9.78v.35c.08 1.51 1.22 2.4 1.22 2.4 1.83 1.79 6.26 4.04 7.3 4.55 0 0 .06.03.1-.01l.02-.04v-.04C7.52 10.8 3.67 6.14 3.67 6.14zM9.65 18.6c-.02-.08-.1-.08-.1-.08l-7.38.26c.8 1.43 2.15 2.53 3.56 2.2.96-.25 3.16-1.78 3.88-2.3.06-.05.04-.09.04-.09zm.08-.78C6.49 15.63.21 12.28.21 12.28c-.15.46-.2.9-.21 1.3v.07c0 1.07.4 1.82.4 1.82.8 1.69 2.34 2.2 2.34 2.2.7.3 1.4.31 1.4.31.12.02 4.4 0 5.54 0 .05 0 .08-.05.08-.05v-.06c0-.03-.03-.05-.03-.05zM9.06 3.19a3.42 3.42 0 00-2.57 3.15v.41c.03.6.16 1.05.16 1.05.66 2.9 3.86 7.65 4.55 8.65.05.05.1.03.1.03a.1.1 0 00.06-.1c1.06-10.6-1.11-13.42-1.11-13.42-.32.02-1.19.23-1.19.23zm8.299 2.27s-.49-1.8-2.44-2.28c0 0-.57-.14-1.17-.22 0 0-2.18 2.81-1.12 13.43.01.07.06.08.06.08.07.03.1-.03.1-.03.72-1.03 3.9-5.76 4.55-8.64 0 0 .36-1.4.02-2.34zm-2.92 13.07s-.07 0-.09.05c0 0-.01.07.03.1.7.51 2.85 2 3.88 2.3 0 0 .16.05.43.06h.14c.69-.02 1.9-.37 3-2.26l-7.4-.25zm7.83-8.41c.14-2.06-1.94-3.97-1.94-3.98 0 0-3.85 4.66-6.67 10.8 0 0-.03.08.02.13l.04.01h.06c1.06-.53 5.46-2.77 7.28-4.54 0 0 1.15-.93 1.21-2.42zm1.52 2.14s-6.28 3.37-9.52 5.55c0 0-.05.04-.03.11 0 0 .03.06.07.06 1.16 0 5.56 0 5.67-.02 0 0 .57-.02 1.27-.29 0 0 1.56-.5 2.37-2.27 0 0 .73-1.45.17-3.14z"/></svg>' },
+          { name: '小米', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF6900" d="M12 0C8.016 0 4.756.255 2.493 2.516.23 4.776 0 8.033 0 12.012c0 3.98.23 7.235 2.494 9.497C4.757 23.77 8.017 24 12 24c3.983 0 7.243-.23 9.506-2.491C23.77 19.247 24 15.99 24 12.012c0-3.984-.233-7.243-2.502-9.504C19.234.252 15.978 0 12 0zM4.906 7.405h5.624c1.47 0 3.007.068 3.764.827.746.746.827 2.233.83 3.676v4.54a.15.15 0 0 1-.152.147h-1.947a.15.15 0 0 1-.152-.148V11.83c-.002-.806-.048-1.634-.464-2.051-.358-.36-1.026-.441-1.72-.458H7.158a.15.15 0 0 0-.151.147v6.98a.15.15 0 0 1-.152.148H4.906a.15.15 0 0 1-.15-.148V7.554a.15.15 0 0 1 .15-.149zm12.131 0h1.949a.15.15 0 0 1 .15.15v8.892a.15.15 0 0 1-.15.148h-1.949a.15.15 0 0 1-.151-.148V7.554a.15.15 0 0 1 .151-.149zM8.92 10.948h2.046c.083 0 .15.066.15.147v5.352a.15.15 0 0 1-.15.148H8.92a.15.15 0 0 1-.152-.148v-5.352a.15.15 0 0 1 .152-.147Z"/></svg>' },
+          { name: '美团', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FFD100" d="M6.923 0c-2.408 0-3.28.25-4.16.721A4.906 4.907 0 0 0 .722 2.763C.25 3.643 0 4.516 0 6.923v10.154c0 2.407.25 3.28.72 4.16a4.905 4.906 0 0 0 2.042 2.042c.88.47 1.752.721 4.16.721h10.156c2.407 0 3.28-.25 4.16-.721a4.906 4.907 0 0 0 2.04-2.042c.471-.88.722-1.753.722-4.16V6.923c0-2.407-.25-3.28-.722-4.16A4.906 4.907 0 0 0 21.238.72C20.357.251 19.484 0 17.077 0ZM4.17 7.51h1.084c.04.24.07.488.11.737h3.47c.05-.25.08-.497.1-.736h1.105a9.849 9.85 0 0 1-.09.736h1.562v.866H7.62v.696h3.642v.855h-3.64v.667h3.64v.854h-3.64v.816h3.89v.865H7.88c.775.935 2.218 1.532 3.78 1.651l-.538.936c-1.442-.17-3.103-.846-4.028-2.04-.856 1.194-2.487 1.92-4.525 2.07l.318-1.005c1.382-.02 2.814-.736 3.431-1.612h-3.62v-.865h3.86v-.816h-3.64v-.854h3.64v-.667h-3.64v-.855h3.64v-.697H2.7v-.866h1.56zm8.603.182h7.976c.358 0 .567.198.567.547v8.146H13.33c-.358 0-.557-.199-.557-.547zm1.044.885V15.5h6.455V8.577Zm3.999.476h1.024v.756h.975v.835h-.975V13c0 .806-.1 1.402-.318 2.02h-1.113c.338-.717.408-1.224.408-1.99v-2.387h-.935c-.14 1.541-.736 3.451-1.363 4.376h-1.134c.607-.855 1.303-2.526 1.472-4.376h-1.512v-.835h3.472z"/></svg>' },
+          { name: '快手', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF4906" d="M18.315 12.264c2.33 0 4.218 1.88 4.218 4.2V19.8c0 2.32-1.888 4.2-4.218 4.2h-6.202a4.218 4.218 0 0 1-4.023-2.938l-3.676 1.833a2.04 2.04 0 0 1-2.731-.903 2.015 2.015 0 0 1-.216-.907v-5.94a2.03 2.03 0 0 1 2.035-2.024 2.044 2.044 0 0 1 .919.218l3.673 1.85a4.218 4.218 0 0 1 4.02-2.925zm-.062 2.162h-6.078c-1.153 0-2.09.921-2.108 2.065v3.247c0 1.148.925 2.081 2.073 2.1h6.113c1.153 0 2.09-.922 2.109-2.065v-3.247a2.104 2.104 0 0 0-2.074-2.1zM4.18 15.72a.554.554 0 0 0-.555.542v3.734a.556.556 0 0 0 .798.496l.01-.004 3.463-1.756V17.51l-3.467-1.73a.557.557 0 0 0-.249-.06zM9.28 0a5.667 5.667 0 0 1 4.98 2.965 4.921 4.921 0 0 1 3.36-1.317c2.714 0 4.913 2.177 4.913 4.863 0 2.686-2.2 4.863-4.912 4.863a4.921 4.921 0 0 1-3.996-2.034 5.651 5.651 0 0 1-4.345 2.034c-3.131 0-5.67-2.546-5.67-5.687C3.61 2.546 6.149 0 9.28 0Zm8.34 3.926c-1.441 0-2.61 1.157-2.61 2.585s1.169 2.585 2.61 2.585c1.443 0 2.612-1.157 2.612-2.585s-1.169-2.585-2.611-2.585zM9.28 2.287a3.395 3.395 0 0 0-3.39 3.4c0 1.877 1.518 3.4 3.39 3.4a3.395 3.395 0 0 0 3.39-3.4c0-1.878-1.518-3.4-3.39-3.4z"/></svg>' },
+          { name: '小红书', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#FF2442" d="M22.405 9.879c.002.016.01.02.07.019h.725a.797.797 0 0 0 .78-.972.794.794 0 0 0-.884-.618.795.795 0 0 0-.692.794c0 .101-.002.666.001.777zm-11.509 4.808c-.203.001-1.353.004-1.685.003a2.528 2.528 0 0 1-.766-.126.025.025 0 0 0-.03.014L7.7 16.127a.025.025 0 0 0 .01.032c.111.06.336.124.495.124.66.01 1.32.002 1.981 0 .01 0 .02-.006.023-.015l.712-1.545a.025.025 0 0 0-.024-.036zM.477 9.91c-.071 0-.076.002-.076.01a.834.834 0 0 0-.01.08c-.027.397-.038.495-.234 3.06-.012.24-.034.389-.135.607-.026.057-.033.042.003.112.046.092.681 1.523.787 1.74.008.015.011.02.017.02.008 0 .033-.026.047-.044.147-.187.268-.391.371-.606.306-.635.44-1.325.486-1.706.014-.11.021-.22.03-.33l.204-2.616.022-.293c.003-.029 0-.033-.03-.034zm7.203 3.757a1.427 1.427 0 0 1-.135-.607c-.004-.084-.031-.39-.235-3.06a.443.443 0 0 0-.01-.082c-.004-.011-.052-.008-.076-.008h-1.48c-.03.001-.034.005-.03.034l.021.293c.076.982.153 1.964.233 2.946.05.4.186 1.085.487 1.706.103.215.223.419.37.606.015.018.037.051.048.049.02-.003.742-1.642.804-1.765.036-.07.03-.055.003-.112zm3.861-.913h-.872a.126.126 0 0 1-.116-.178l1.178-2.625a.025.025 0 0 0-.023-.035l-1.318-.003a.148.148 0 0 1-.135-.21l.876-1.954a.025.025 0 0 0-.023-.035h-1.56c-.01 0-.02.006-.024.015l-.926 2.068c-.085.169-.314.634-.399.938a.534.534 0 0 0-.02.191.46.46 0 0 0 .23.378.981.981 0 0 0 .46.119h.59c.041 0-.688 1.482-.834 1.972a.53.53 0 0 0-.023.172.465.465 0 0 0 .23.398c.15.092.342.12.475.12l1.66-.001c.01 0 .02-.006.023-.015l.575-1.28a.025.025 0 0 0-.024-.035zm-6.93-4.937H3.1a.032.032 0 0 0-.034.033c0 1.048-.01 2.795-.01 6.829 0 .288-.269.262-.28.262h-.74c-.04.001-.044.004-.04.047.001.037.465 1.064.555 1.263.01.02.03.033.051.033.157.003.767.009.938-.014.153-.02.3-.06.438-.132.3-.156.49-.419.595-.765.052-.172.075-.353.075-.533.002-2.33 0-4.66-.007-6.991a.032.032 0 0 0-.032-.032zm11.784 6.896c0-.014-.01-.021-.024-.022h-1.465c-.048-.001-.049-.002-.05-.049v-4.66c0-.072-.005-.07.07-.07h.863c.08 0 .075.004.075-.074V8.393c0-.082.006-.076-.08-.076h-3.5c-.064 0-.075-.006-.075.073v1.445c0 .083-.006.077.08.077h.854c.075 0 .07-.004.07.07v4.624c0 .095.008.084-.085.084-.37 0-1.11-.002-1.304 0-.048.001-.06.03-.06.03l-.697 1.519s-.014.025-.008.036c.006.01.013.008.058.008 1.748.003 3.495.002 5.243.002.03-.001.034-.006.035-.033v-1.539zm4.177-3.43c0 .013-.007.023-.02.024-.346.006-.692.004-1.037.004-.014-.002-.022-.01-.022-.024-.005-.434-.007-.869-.01-1.303 0-.072-.006-.071.07-.07l.733-.003c.041 0 .081.002.12.015.093.025.16.107.165.204.006.431.002 1.153.001 1.153zm2.67.244a1.953 1.953 0 0 0-.883-.222h-.18c-.04-.001-.04-.003-.042-.04V10.21c0-.132-.007-.263-.025-.394a1.823 1.823 0 0 0-.153-.53 1.533 1.533 0 0 0-.677-.71 2.167 2.167 0 0 0-1-.258c-.153-.003-.567 0-.72 0-.07 0-.068.004-.068-.065V7.76c0-.031-.01-.041-.046-.039H17.93s-.016 0-.023.007c-.006.006-.008.012-.008.023v.546c-.008.036-.057.015-.082.022h-.95c-.022.002-.028.008-.03.032v1.481c0 .09-.004.082.082.082h.913c.082 0 .072.128.072.128V11.19s.003.117-.06.117h-1.482c-.068 0-.06.082-.06.082v1.445s-.01.068.064.068h1.457c.082 0 .076-.006.076.079v3.225c0 .088-.007.081.082.081h1.43c.09 0 .082.007.082-.08v-3.27c0-.029.006-.035.033-.035l2.323-.003c.098 0 .191.02.28.061a.46.46 0 0 1 .274.407c.008.395.003.79.003 1.185 0 .259-.107.367-.33.367h-1.218c-.023.002-.029.008-.028.033.184.437.374.871.57 1.303a.045.045 0 0 0 .04.026c.17.005.34.002.51.003.15-.002.517.004.666-.01a2.03 2.03 0 0 0 .408-.075c.59-.18.975-.698.976-1.313v-1.981c0-.128-.01-.254-.034-.38 0 .078-.029-.641-.724-.998z"/></svg>' },
+          { name: '携程', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#287DFA" d="M17.834 9.002c-.68 0-1.29.31-1.707.799v-.514h-1.708v8.348h1.897v-2.923c.416.344.943.551 1.518.551 1.677 0 3.036-1.401 3.036-3.13s-1.36-3.13-3.036-3.13zm-.19 4.516c-.733 0-1.328-.62-1.328-1.385s.595-1.385 1.328-1.385c.734 0 1.328.62 1.328 1.385s-.594 1.385-1.328 1.385zm6.356.607a1.138 1.138 0 1 1-2.277 0 1.138 1.138 0 0 1 2.277 0zM13.205 7.428a1.062 1.062 0 1 1-2.125 0 1.062 1.062 0 0 1 2.125 0zm-2.011 1.859h1.897v5.692h-1.897V9.287zM6.83 8.225H4.364v6.754H2.466V8.225H0V6.63h6.83v1.594zm3.035 1.033c.13 0 .255.012.38.03v1.74a1.55 1.55 0 0 0-.297-.031c-.88 0-1.594.612-1.594 1.593v2.389H6.451V9.287h1.707v.9c.363-.558.991-.93 1.707-.93z"/></svg>' },
+          { name: '网易云音乐', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#D43C33" d="M13.046 9.388a3.919 3.919 0 0 0-.66.19c-.809.312-1.447.991-1.666 1.775a2.269 2.269 0 0 0-.074.81c.048.546.333 1.05.764 1.35a1.483 1.483 0 0 0 2.01-.286c.406-.531.355-1.183.24-1.636-.098-.387-.22-.816-.345-1.249a64.76 64.76 0 0 1-.269-.954zm-.82 10.07c-3.984 0-7.224-3.24-7.224-7.223 0-.98.226-3.02 1.884-4.822A7.188 7.188 0 0 1 9.502 5.6a.792.792 0 1 1 .587 1.472 5.619 5.619 0 0 0-2.795 2.462 5.538 5.538 0 0 0-.707 2.7 5.645 5.645 0 0 0 5.638 5.638c1.844 0 3.627-.953 4.542-2.428 1.042-1.68.772-3.931-.627-5.238a3.299 3.299 0 0 0-1.437-.777c.172.589.334 1.18.494 1.772.284 1.12.1 2.181-.519 2.989-.39.51-.956.888-1.592 1.064a3.038 3.038 0 0 1-2.58-.44 3.45 3.45 0 0 1-1.44-2.514c-.04-.467.002-.93.128-1.376.35-1.256 1.356-2.339 2.622-2.826a5.5 5.5 0 0 1 .823-.246l-.134-.505c-.37-1.371.25-2.579 1.547-3.007.329-.109.68-.145 1.025-.105.792.09 1.476.592 1.709 1.023.258.507-.096 1.153-.706 1.153a.788.788 0 0 1-.54-.213c-.088-.08-.163-.174-.259-.247a.825.825 0 0 0-.632-.166.807.807 0 0 0-.634.551c-.056.191-.031.406.02.595.07.256.159.597.217.82 1.11.098 2.162.54 2.97 1.296 1.974 1.844 2.35 4.886.892 7.233-1.197 1.93-3.509 3.177-5.889 3.177zM0 12c0 6.627 5.373 12 12 12s12-5.373 12-12S18.627 0 12 0 0 5.373 0 12Z"/></svg>' },
+          { name: '微博', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#E6162D" d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.737 5.439l-.002.004zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.601.622.263.82.972.442 1.592zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.313-.361-.177-.586.138-.227.436-.346.672-.24.239.09.315.36.18.601l.014-.028zm.176-2.719c-1.893-.493-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.64 4.318-.341 5.132-2.179.8-1.793-.201-3.642-2.161-4.149zm7.563-1.224c-.346-.105-.57-.18-.405-.615.375-.977.42-1.804 0-2.404-.781-1.112-2.915-1.053-5.364-.03 0 0-.766.331-.571-.271.376-1.217.315-2.224-.27-2.809-1.338-1.337-4.869.045-7.888 3.08C1.309 10.87 0 13.273 0 15.348c0 3.981 5.099 6.395 10.086 6.395 6.536 0 10.888-3.801 10.888-6.82 0-1.822-1.547-2.854-2.915-3.284v.01zm1.908-5.092c-.766-.856-1.908-1.187-2.96-.962-.436.09-.706.511-.616.932.09.42.511.691.932.602.511-.105 1.067.044 1.442.465.376.421.466.977.316 1.473-.136.406.089.856.51.992.405.119.857-.105.992-.512.33-1.021.12-2.178-.646-3.035l.03.045zm2.418-2.195c-1.576-1.757-3.905-2.419-6.054-1.968-.496.104-.812.587-.706 1.081.104.496.586.813 1.082.707 1.532-.331 3.185.15 4.296 1.383 1.112 1.246 1.429 2.943.947 4.416-.165.48.106 1.007.586 1.157.479.165.991-.104 1.157-.586.675-2.088.241-4.478-1.338-6.235l.03.045z"/></svg>' },
+          { name: '知乎', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#0084FF" d="M5.721 0C2.251 0 0 2.25 0 5.719V18.28C0 21.751 2.252 24 5.721 24h12.56C21.751 24 24 21.75 24 18.281V5.72C24 2.249 21.75 0 18.281 0zm1.964 4.078c-.271.73-.5 1.434-.68 2.11h4.587c.545-.006.445 1.168.445 1.171H9.384a58.104 58.104 0 01-.112 3.797h2.712c.388.023.393 1.251.393 1.266H9.183a9.223 9.223 0 01-.408 2.102l.757-.604c.452.456 1.512 1.712 1.906 2.177.473.681.063 2.081.063 2.081l-2.794-3.382c-.653 2.518-1.845 3.607-1.845 3.607-.523.468-1.58.82-2.64.516 2.218-1.73 3.44-3.917 3.667-6.497H4.491c0-.015.197-1.243.806-1.266h2.71c.024-.32.086-3.254.086-3.797H6.598c-.136.406-.158.447-.268.753-.594 1.095-1.603 1.122-1.907 1.155.906-1.821 1.416-3.6 1.591-4.064.425-1.124 1.671-1.125 1.671-1.125zM13.078 6h6.377v11.33h-2.573l-2.184 1.373-.401-1.373h-1.219zm1.313 1.219v8.86h.623l.263.937 1.455-.938h1.456v-8.86z"/></svg>' },
+          { name: '抖音', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#000000" d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>' },
+          { name: '微信', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#07C160" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/></svg>' },
+          { name: '淘宝', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#E94F20" d="M21.3099 9.9008c.5285 0 .9584.4284.9584.9589 0 .5276-.4299.958-.9584.958-.5276 0-.9585-.4304-.9585-.958 0-.5305.4309-.959.9585-.959zm2.3899 3.0462h-10.408v-.9595h4.15V9.7591h-2.8869v-.768h2.8868v-.9234h-2.508v.2034h-1.6418V5.3733h1.6418v.3497c.4945-.0607 1.463-.1814 2.5175-.2956v-.8257h1.8522v.6408c.9249-.0807 1.753-.1312 2.211-.1112 1.489.0716 2.4449.2816 2.485 1.273.0356.989-1.4244 1.9043-1.4244 1.9043l-.4509-.4338v.1929h-2.8116v.9233h3.229v.768h-3.229v2.2285h4.3873v.9595zM21.5259 7.299l-.0115-.0115s1.3722-.7595.3427-1.272c-.8633-.43-5.5346.3056-6.9234.6257v.6578h6.5922zM1.8822 6.4166c.5515 0 .9985-.449.9985-1 0-.5531-.447-.9995-.9985-.9995a.9984.9984 0 00-1.001.9995c0 .551.4463 1 1.001 1zm3.4094-.8596c.252-.4364.3717-.7195.3717-.7195l-1.466-.4123S3.6068 6.3546 2.5527 7.253c0 0 1.0195.5897 1.0095.5732a9.6444 9.6444 0 00.782-.8793c.2345-.1017.4585-.198.6794-.2876-.2715.487-.7094 1.219-1.1478 1.6809l.6178.5385s.4198-.4033.8792-.8907h.5246v.8993H3.8557v.7204h2.0416v1.7235c-.025 0-.0521 0-.0782-.002-.224-.0106-.5751-.0476-.7124-.265-.1678-.2636-.044-.7496-.0346-1.0457H3.6608l-.0496.026s-.517 2.3142 1.489 2.2621c1.8793.0521 2.9544-.523 3.4725-.9178l.2064.7645 1.1583-.4825-.785-1.9183-.941.292.1764.6574c-.2415.1809-.518.3157-.8187.4134V9.6076h1.995v-.7204h-1.995v-.8993h2.003v-.72h-3.557c.2565-.3111.4589-.5982.5095-.78L5.9058 6.32c2.6603-.9519 4.1408-.7886 4.1278.773v4.1128s.1568 1.4124-1.461 1.3107l-.8757-.188-.207.8307s3.7822 1.0812 4.0913-1.8246c.3096-2.9058-.0767-4.7576-.0767-4.7576s-.3451-2.6824-6.213-1.02zM.0582 12.1534l1.5867.9905c1.0967-2.3813 1.0265-2.0657 1.302-2.92.2832-.8737.3453-1.54-.1362-2.023-.6172-.6197-.6844-.6773-1.6017-1.3582L.5487 7.8562l1.2164.7576s.8141.4153.4274 1.1903c-.3617.7375-2.1343 2.3493-2.1343 2.3493zm19.94 6.8484s-.0186.523-.6704.523c-.5892 0-.6363-.4113-.6363-.4113-.2485.2996-.6207.4549-1.0696.4549-.7606 0-1.2961-.5135-1.2961-1.2896 0-.786.5576-1.28 1.3983-1.28.3832 0 .725.1462.9258.4037.0066-.0706.0136-.1362.0136-.1968 0-.5622-.3092-.8127-1.01-.8127-.3382 0-.6659.0486-1.0136.1408.1107-.219.1924-.3793.2971-.4574.1202-.0972.4294-.1408.9419-.1408 1.269 0 1.742.4259 1.742 1.4279v1.2024c0 .3161.033.4359.3772.4359zm-1.3272-.745c0-.4815-.2555-.747-.6378-.747-.4043 0-.6668.2825-.6668.7595 0 .467.2775.7615.6533.7615.3882 0 .6513-.275.6513-.774zm5.2706-.501c0 1.1528-.6924 1.8271-1.7786 1.8271-1.0957 0-1.7766-.6743-1.7766-1.8271 0-1.1584.6809-1.8252 1.7766-1.8252 1.0862 0 1.7786.6719 1.7786 1.8252zm-1.0867 0c0-.8693-.237-1.2997-.692-1.2997-.4734 0-.6938.4304-.6938 1.2997 0 .8662.2204 1.299.6939 1.299.467 0 .6919-.4328.6919-1.299zm-7.1313-.0441c0 1.1703-.6534 1.8567-1.5767 1.8567-.4233 0-.8056-.1633-1.0466-.47 0 0-.1082.4264-.6618.4264-.6884 0-.6644-.523-.6644-.523.3868.0165.3758-.2145.3758-.436v-2.8862c0-.3552-.0742-.4795-.4269-.4865.0136-.1072.0777-.5376.6789-.5376.8156 0 .7615.9149.7615.9149v.786c.229-.268.5516-.3942.9905-.3942.9624 0 1.5697.6447 1.5697 1.7495zm-1.0937.0806c0-.8983-.2716-1.3557-.7616-1.3557-.4393 0-.74.3968-.74 1.1047v.3602c0 .7205.3152 1.1168.7631 1.1168.477 0 .7385-.4134.7385-1.226zm-3.2425-.0365c0 1.1528-.688 1.8271-1.7806 1.8271-1.0937 0-1.7726-.6743-1.7726-1.8271 0-1.1584.6789-1.8252 1.7726-1.8252 1.0927 0 1.7806.6719 1.7806 1.8252zm-1.0832 0c0-.8693-.236-1.2997-.6974-1.2997-.467 0-.6874.4304-.6874 1.2997 0 .8662.2205 1.299.6874 1.299.469 0 .6974-.4328.6974-1.299zm-5.9895-2.716c-.268.0782-.7901.0972-1.5516.0972-.925 0-1.5391-.039-1.8543-.039-.5195 0-.7254.1342-.9088.6592.3006-.1017.6729-.1087 1.1353-.1087.3512 0 .4108.0431.4108.2941V18.846c0 .2821.1178.6789.7255.6789.7104 0 .8346-.526.8346-.526-.3552-.007-.4248-.1313-.4248-.4865V15.952c0-.2675.1012-.2795.471-.2795.1252 0 .2094.007.2605.007.545 0 .6883-.1047.9018-.6398zm3.1303 3.962s-.018.523-.6664.523c-.556 0-.6403-.4113-.6403-.4113-.248.2996-.6207.4549-1.0656.4549-.7655 0-1.2996-.5135-1.2996-1.2896 0-.786.557-1.28 1.3993-1.28.3843 0 .7274.1462.9258.4037.0036-.0706.0106-.1362.0106-.1968 0-.5622-.3051-.8127-1.007-.8127-.3382 0-.6669.0486-1.015.1408.1131-.219.1923-.3793.2945-.4574.1293-.0972.4329-.1408.9469-.1408 1.265 0 1.746.4259 1.746 1.4279v1.2024c0 .3161.0276.4359.3708.4359zm-1.3262-.745c0-.4815-.2555-.747-.6378-.747-.4013 0-.6668.2825-.6668.7595 0 .467.279.7615.6513.7615.3893 0 .6533-.275.6533-.774z"/></svg>' },
+          { name: '支付宝', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#1677FF" d="M19.695 15.07c3.426 1.158 4.203 1.22 4.203 1.22V3.846c0-2.124-1.705-3.845-3.81-3.845H3.914C1.808.001.102 1.722.102 3.846v16.31c0 2.123 1.706 3.845 3.813 3.845h16.173c2.105 0 3.81-1.722 3.81-3.845v-.157s-6.19-2.602-9.315-4.119c-2.096 2.602-4.8 4.181-7.607 4.181-4.75 0-6.361-4.19-4.112-6.949.49-.602 1.324-1.175 2.617-1.497 2.025-.502 5.247.313 8.266 1.317a16.796 16.796 0 0 0 1.341-3.302H5.781v-.952h4.799V6.975H4.77v-.953h5.81V3.591s0-.409.411-.409h2.347v2.84h5.744v.951h-5.744v1.704h4.69a19.453 19.453 0 0 1-1.986 5.06c1.424.52 2.702 1.011 3.654 1.333m-13.81-2.032c-.596.06-1.71.325-2.321.869-1.83 1.608-.735 4.55 2.968 4.55 2.151 0 4.301-1.388 5.99-3.61-2.403-1.182-4.438-2.028-6.637-1.809"/></svg>' },
+          { name: '大疆', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#000000" d="M19.2 7.8a716.856 716.856 0 0 0-1.232 4.63c-.202.772-.401 1.544-.634 2.308-.226.743-.504 1.535-.91 2.21-.422.703-.969 1.253-1.726 1.604-.3.137-.615.24-.939.306-.46.09-.926.146-1.394.165-1.163.065-3.628.056-4.79.056l.713-2.64c.539 0 1.078.002 1.617-.013.52-.014 1.092-.042 1.605-.163.56-.133.984-.36 1.355-.817.337-.416.564-.935.75-1.424.34-.893.688-2.173.934-3.093.277-1.041.544-2.085.812-3.129zm4.8 0-2.072 7.68h-3.84l2.073-7.68ZM11.339 4.92h3.84c-.403 1.5-.805 2.999-1.212 4.496-.283 1.044-.565 2.088-.872 3.124-.135.452-.269.903-.445 1.342-.141.352-.3.666-.591.93a1.908 1.908 0 0 1-.734.405c-.356.112-.717.154-1.085.184-.53.043-1.06.054-1.591.063-1.991.02-3.983.02-5.974-.001a21.408 21.408 0 0 1-.954-.034 5.319 5.319 0 0 1-.632-.07 1.851 1.851 0 0 1-.412-.119c-.44-.192-.664-.575-.677-1.043 0-.263.032-.525.093-.78.076-.367.171-.728.265-1.09.179-.691.506-1.966.762-2.638.2-.526.464-1.05.966-1.382.28-.186.576-.285.901-.35.241-.05.483-.075.728-.093.41-.03.82-.04 1.23-.047.582-.01 1.165-.013 1.748-.015L8.148 7.8h1.454l-.518 1.92c-.864 0-1.728-.002-2.593.003-.252.001-.504 0-.756.016a.968.968 0 0 0-.264.042c-.113.04-.17.11-.22.213-.073.15-.115.31-.162.468a84.804 84.804 0 0 0-.503 1.857c-.035.14-.07.28-.1.42-.022.099-.04.197-.05.298-.01.11-.014.242.053.345.068.103.182.127.29.143.12.018.241.021.363.025.199.006.398.007.597.008.544.003 1.089.003 1.633 0 .25-.002.501-.004.752-.014.173-.007.343-.013.513-.054.13-.031.23-.08.318-.186.056-.071.1-.15.133-.235.088-.209.15-.425.213-.641.245-.83.466-1.665.692-2.499l.675-2.503.67-2.505h3.84z"/></svg>' },
+          { name: 'OPPO', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#2D683D" d="M2.85 12.786h-.001C1.639 12.774.858 12.2.858 11.321s.781-1.452 1.99-1.465c1.21.013 1.992.588 1.992 1.465s-.782 1.453-1.99 1.465zm.034-3.638h-.073C1.156 9.175 0 10.068 0 11.32s1.156 2.147 2.811 2.174h.073c1.655-.027 2.811-.921 2.811-2.174S4.54 9.175 2.885 9.148zm18.27 3.638c-1.21-.012-1.992-.587-1.992-1.465s.782-1.452 1.991-1.465c1.21.013 1.991.588 1.991 1.465s-.781 1.453-1.99 1.465zm.035-3.638h-.073c-1.655.027-2.811.92-2.811 2.173s1.156 2.147 2.81 2.174h.074C22.844 13.468 24 12.574 24 11.32s-1.156-2.146-2.811-2.173zm-6.126 3.638c-1.21-.012-1.99-.587-1.99-1.465s.78-1.452 1.99-1.465c1.21.013 1.991.588 1.991 1.465s-.781 1.453-1.99 1.465zm.036-3.638h-.073c-.789.013-1.464.222-1.955.574v-.37h-.857v5.5h.857v-1.931c.49.351 1.166.56 1.954.574h.074c1.655-.027 2.81-.921 2.81-2.174s-1.155-2.146-2.81-2.173zm-6.144 3.638c-1.21-.012-1.99-.587-1.99-1.465s.78-1.452 1.99-1.465c1.21.013 1.991.588 1.991 1.465s-.781 1.453-1.99 1.465zm.037-3.638H8.92c-.789.013-1.464.222-1.955.574v-.37h-.856v5.5h.856v-1.931c.491.351 1.166.56 1.955.574a3.728 3.728 0 0 0 .073 0c1.655-.027 2.811-.921 2.811-2.174s-1.156-2.146-2.81-2.173z"/></svg>' },
+          { name: 'vivo', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#415FFF" d="M19.604 14.101c-1.159 0-1.262-.95-1.262-1.24 0-.29.103-1.242 1.262-1.242h2.062c1.16 0 1.263.951 1.263 1.242 0 .29-.104 1.24-1.263 1.24m-2.062-3.527c-2.142 0-2.333 1.752-2.333 2.287 0 .535.19 2.286 2.333 2.286h2.062c2.143 0 2.334-1.751 2.334-2.286 0-.535-.19-2.287-2.334-2.287m-5.477.107c-.286 0-.345.05-.456.213-.11.164-2.022 3.082-2.022 3.082-.06.09-.126.126-.206.126-.08 0-.145-.036-.206-.126 0 0-1.912-2.918-2.022-3.082-.11-.164-.17-.213-.456-.213h-.668c-.154 0-.224.12-.127.267l2.283 3.467c.354.521.614.732 1.196.732s.842-.21 1.196-.732l2.284-3.467c.096-.146.026-.267-.128-.267m-8.876.284c0-.203.08-.284.283-.284h.505c.203 0 .283.08.283.283v3.9c0 .202-.08.283-.283.283h-.505c-.203 0-.283-.08-.283-.283zm-1.769-.285c-.287 0-.346.05-.456.213-.11.164-2.022 3.082-2.022 3.082-.061.09-.126.126-.206.126-.08 0-.145-.036-.206-.126 0 0-1.912-2.918-2.023-3.082-.11-.164-.169-.213-.455-.213H.175c-.171 0-.224.12-.127.267l2.283 3.467c.355.521.615.732 1.197.732.582 0 .842-.21 1.196-.732l2.283-3.467c.097-.146.044-.267-.127-.267m1.055-.893c-.165-.164-.165-.295 0-.46l.351-.351c.165-.165.296-.165.46 0l.352.351c.165.165.165.296 0 .46l-.352.352c-.164.165-.295.165-.46 0z"/></svg>' },
+          { name: '荣耀', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#000000" d="M2.601 9.753v1.823H.807V9.753H0v4.498h.807v-1.874h1.794v1.874h.807V9.753h-.807Zm18.671.801h.898c.369 0 .667.297.667.662a.665.665 0 0 1-.667.663h-.898v-1.325Zm-.806-.801v4.498h.806v-2.002l1.68 2.002H24l-1.376-1.64a1.462 1.462 0 0 0-.444-2.858h-1.716.002Zm-7.63-.014v2.807l-1.959-2.807h-.644v4.498h.807v-2.82l1.968 2.82h.633V9.739h-.805Zm-7.532 2.26c0-.832.68-1.506 1.517-1.506A1.51 1.51 0 0 1 8.337 12c0 .832-.679 1.506-1.516 1.506-.403 0-.789-.159-1.073-.441A1.504 1.504 0 0 1 5.304 12v-.001ZM4.497 12c0 .933.566 1.774 1.434 2.132.869.357 1.868.16 2.533-.5.664-.66.863-1.653.503-2.515a2.324 2.324 0 0 0-2.146-1.425 2.316 2.316 0 0 0-2.323 2.307L4.497 12Zm11.04-.001a1.513 1.513 0 0 1 1.518-1.506c.838 0 1.516.675 1.516 1.507a1.513 1.513 0 0 1-1.518 1.506c-.402 0-.788-.159-1.072-.441a1.5 1.5 0 0 1-.444-1.066ZM14.73 12c0 .933.566 1.774 1.434 2.132.868.357 1.868.16 2.532-.5.665-.66.864-1.653.504-2.515a2.325 2.325 0 0 0-2.147-1.425 2.316 2.316 0 0 0-2.323 2.307V12Z"/></svg>' },
+          { name: '联想', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#E2231A" d="M21.044 12.288c0 .5-.343.867-.815.867-.464 0-.827-.38-.827-.867 0-.51.343-.868.815-.868.464 0 .827.381.827.868zm-14.305-.92a.787.787 0 0 0-.651.307.991.991 0 0 0-.172.738l1.479-.614a.708.708 0 0 0-.656-.43zm6.963.052c-.472 0-.816.358-.816.868 0 .486.364.867.828.867.472 0 .815-.368.815-.867 0-.487-.363-.868-.827-.868zM24 7.997v8.006H0V7.997h24zM5.01 13.05H3.088V9.825H2.23v4.003h2.78v-.777zm1.137-.094l2.163-.897a1.667 1.667 0 0 0-.37-.86c-.284-.33-.704-.505-1.216-.505-.931 0-1.633.686-1.633 1.593 0 .93.704 1.593 1.726 1.593.572 0 1.158-.272 1.432-.589l-.535-.411c-.357.264-.56.326-.885.326-.292 0-.52-.09-.682-.25zm5.57-1.039c0-.709-.507-1.223-1.252-1.223a1.28 1.28 0 0 0-1.005.494v-.442h-.846v3.081h.846v-1.753c0-.316.245-.651.698-.651.35 0 .712.243.712.651v1.753h.847v-1.91zm3.647.37c0-.904-.725-1.593-1.65-1.593-.933 0-1.663.7-1.663 1.593 0 .903.726 1.592 1.651 1.592.932 0 1.662-.7 1.662-1.592zm2.066 1.54l1.268-3.081h-.967l-.765 2.099-.765-2.1h-.966l1.268 3.081h.927zm4.449-1.54c0-.904-.725-1.593-1.65-1.593-.932 0-1.662.7-1.662 1.593 0 .903.725 1.592 1.65 1.592.932 0 1.662-.7 1.662-1.592z"/></svg>' },
+          { name: '米哈游', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#4EA4DD" d="M6.939 8.8a.65.65 0 0 0-.653.653.65.65 0 0 0 .653.653.65.65 0 0 0 .653-.653.65.65 0 0 0-.653-.653m-5.506 1.886A1.43 1.43 0 0 0 0 12.118v2.474a.59.59 0 0 0 .592.592.59.59 0 0 0 .592-.592v-2.25a.464.464 0 0 1 .465-.464.464.464 0 0 1 .465.465v2.249a.59.59 0 1 0 1.184 0v-2.25a.464.464 0 0 1 .465-.464.464.464 0 0 1 .465.465v1.208c.001.914.736 1.649 1.65 1.649s1.649-.735 1.649-1.649V11.49a.59.59 0 0 0-.592-.592.59.59 0 0 0-.592.592v2.037a.464.464 0 0 1-.465.465.464.464 0 0 1-.466-.465v-1.409a1.43 1.43 0 0 0-1.433-1.432c-.448 0-.853.202-1.115.525-.033.04-.08.079-.158.079s-.125-.038-.158-.079a1.43 1.43 0 0 0-1.115-.525M9.057 9.16a.59.59 0 0 0-.592.591v4.84a.59.59 0 0 0 .592.593.59.59 0 0 0 .592-.592v-1.588a.27.27 0 0 1 .27-.27h.636a.27.27 0 0 1 .27.27v1.588a.59.59 0 0 0 .591.592.59.59 0 0 0 .592-.592V9.75a.59.59 0 0 0-.592-.592.59.59 0 0 0-.592.592v1.465a.27.27 0 0 1-.269.27h-.637a.27.27 0 0 1-.269-.27V9.751a.59.59 0 0 0-.592-.592m7.784 0a.286.286 0 0 0-.203.47l1.166 2.11v2.853a.59.59 0 0 0 .592.592.59.59 0 0 0 .592-.592v-2.853l1.166-2.11c.168-.233-.015-.47-.203-.47h-.606a.27.27 0 0 0-.218.126l-.65 1.188c-.017.03-.046.041-.077.041s-.063-.01-.08-.04l-.655-1.19a.27.27 0 0 0-.218-.125zm-3.776 1.2c-.032 0-.053.155-.053.368s.041.416.082.416c.04 0 .04-.025.237-.196s.228-.171.228-.22-.073-.09-.245-.213c-.171-.122-.216-.155-.249-.155m3.437 0c-.032 0-.077.033-.249.155s-.245.164-.245.213.033.048.229.22.196.196.237.196.081-.204.081-.416-.02-.368-.053-.368m-1.718.343c-1.082 0-1.96 1.006-1.96 2.245s.878 2.245 1.96 2.245 1.959-1.005 1.959-2.245-.877-2.245-1.96-2.245m0 1.118c.541 0 .98.506.98 1.127 0 .622-.438 1.126-.98 1.126s-.979-.504-.979-1.126c0-.62.44-1.127.98-1.127m8.685-1.33c-.334 0-.498.147-.596.22s-.18.147-.269.147c-.229 0-.392-.155-.849-.155-1.082 0-1.96 1.005-1.96 2.245s.878 2.245 1.96 2.245 1.96-1.005 1.96-2.245c0-.452-.12-.894-.343-1.267-.037-.096-.05-.194-.05-.386 0-.265.128-.46.27-.56a.8.8 0 0 1 .408-.138 1.2 1.2 0 0 0-.53-.106m-1.715 1.33c.54 0 .98.505.98 1.127s-.439 1.126-.98 1.126-.98-.504-.98-1.126c0-.62.44-1.126.98-1.127"/></svg>' },
+          { name: '哔哩哔哩', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#00A1D6" d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373Z"/></svg>' },
+          { name: '蚂蚁设计', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#0170FE" d="M17.4511 6.6808c.5091-.5064.5091-1.3316 0-1.838l-1.8729-1.873.0027.0027c-.4957-.4957-1.3478-1.3478-2.5535-2.5508-.568-.5547-1.487-.5493-2.0498.0134L.426 10.9787a1.4426 1.4426 0 0 0 0 2.047l10.549 10.541a1.4506 1.4506 0 0 0 2.0497 0l4.4238-4.4211c.509-.5064.509-1.3317 0-1.8381a1.3049 1.3049 0 0 0-1.8408 0l-3.3493 3.3546c-.1393.1394-.3564.1394-.4957 0l-8.4268-8.4188c-.1394-.1393-.1394-.3563 0-.4956L11.76 3.3289c.0107-.0108.0241-.0188.0349-.0295.1393-.1099.3322-.0992.4608.0295l3.3547 3.352c.509.509 1.3343.509 1.8407 0zm-8.2446 5.375a2.8482 2.8456 0 1 0 5.6965 0 2.8482 2.8456 0 1 0-5.6965 0zm14.3672-1.0343l-3.293-3.277c-.5092-.5063-1.3344-.5063-1.8408.0028a1.2968 1.2968 0 0 0 0 1.838l2.2239 2.2213c.1393.1393.1393.3564 0 .4957l-2.1918 2.189a1.2968 1.2968 0 0 0 0 1.8382 1.3049 1.3049 0 0 0 1.8408 0l3.2635-3.2609a1.445 1.445 0 0 0-.0026-2.047Z"/></svg>' },
+          { name: 'Shopee', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#EE4D2D" d="M15.9414 17.9633c.229-1.879-.981-3.077-4.1758-4.0969-1.548-.528-2.277-1.22-2.26-2.1719.065-1.056 1.048-1.825 2.352-1.85a5.2898 5.2898 0 0 1 2.8838.89c.116.072.197.06.263-.039.09-.145.315-.494.39-.62.051-.081.061-.187-.068-.281-.185-.1369-.704-.4149-.983-.5319a6.4697 6.4697 0 0 0-2.5118-.514c-1.909.008-3.4129 1.215-3.5389 2.826-.082 1.1629.494 2.1078 1.73 2.8278.262.152 1.6799.716 2.2438.892 1.774.552 2.695 1.5419 2.478 2.6969-.197 1.047-1.299 1.7239-2.818 1.7439-1.2039-.046-2.2878-.537-3.1278-1.19l-.141-.11c-.104-.08-.218-.075-.287.03-.05.077-.376.547-.458.67-.077.108-.035.168.045.234.35.293.817.613 1.134.775a6.7097 6.7097 0 0 0 2.8289.727 4.9048 4.9048 0 0 0 2.0759-.354c1.095-.465 1.8029-1.394 1.9449-2.554zM11.9986 1.4009c-2.068 0-3.7539 1.95-3.8329 4.3899h7.6657c-.08-2.44-1.765-4.3899-3.8328-4.3899zm7.8516 22.5981-.08.001-15.7843-.002c-1.074-.04-1.863-.91-1.971-1.991l-.01-.195L1.298 6.2858a.459.459 0 0 1 .45-.494h4.9748C6.8448 2.568 9.1607 0 11.9996 0c2.8388 0 5.1537 2.5689 5.2757 5.7898h4.9678a.459.459 0 0 1 .458.483l-.773 15.5883-.007.131c-.094 1.094-.979 1.9769-2.0709 2.0059z"/></svg>' },
+        ];
+
+      const SCHOOL_LOGOS = [
+          { name: '清华大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#5B2C6F"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">清</text></svg>' },
+          { name: '北京大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#8B0000"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">北</text></svg>' },
+          { name: '复旦大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#1A3C6E"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">复</text></svg>' },
+          { name: '上海交通大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#B22222"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">交</text></svg>' },
+          { name: '浙江大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#0F52BA"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">浙</text></svg>' },
+          { name: '南京大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#6A0DAD"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">南</text></svg>' },
+          { name: '中国科学技术大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#003366"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">科</text></svg>' },
+          { name: '武汉大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#006633"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">武</text></svg>' },
+          { name: '华中科技大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#0077C8"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">华</text></svg>' },
+          { name: '中山大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#004B87"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">中</text></svg>' },
+          { name: '哈尔滨工业大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#003366"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">哈</text></svg>' },
+          { name: '西安交通大学', svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="12" fill="#8B0000"/><text x="12" y="15.5" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff" font-family="PingFang SC, Microsoft YaHei, serif">西</text></svg>' },
+        ];
+
+      const insertLogoAtCursor = (dataUri) => {
+        if (!restoreSelection()) { flash('先把光标放到想插入 logo 的位置'); return false; }
+        const sel = window.getSelection();
+        const range = sel.getRangeAt(0);
+        range.collapse(true);
+        const img = document.createElement('img');
+        img.className = 'company-logo';
+        img.src = dataUri; img.alt = 'logo';
+        range.insertNode(img);
+        range.setStartAfter(img); range.collapse(true);
+        sel.removeAllRanges(); sel.addRange(range);
+        commit(); scheduleSave();
+        return true;
+      };
+
+      const logoPanel = document.getElementById('logoPanel');
+      const logoPicker = document.querySelector('.logo-picker');
+
+      const renderLogoGrid = (gridEl, presets) => {
+        presets.forEach(p => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'logo-item';
+          item.title = '插入 ' + p.name;
+          const im = document.createElement('img');
+          im.src = svgToDataUri(p.svg);
+          im.alt = p.name;
+          item.appendChild(im);
+          item.addEventListener('mousedown', (e) => e.preventDefault());
+          item.addEventListener('click', () => { insertLogoAtCursor(svgToDataUri(p.svg)); logoPanel.hidden = true; });
+          gridEl.appendChild(item);
+        });
+      };
+      renderLogoGrid(document.getElementById('companyGrid'), COMPANY_LOGOS);
+      renderLogoGrid(document.getElementById('schoolGrid'), SCHOOL_LOGOS);
+
+      document.getElementById('logoBtn').addEventListener('mousedown', (e) => e.preventDefault());
+      document.getElementById('logoBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        // 兜底：面板打开前主动锁定当前 sheet 内选区
+        const sel = window.getSelection();
+        if (sel.rangeCount) {
+          const r = sel.getRangeAt(0);
+          if (sheet.contains(r.commonAncestorContainer)) lastRange = r.cloneRange();
+        }
+        logoPanel.hidden = !logoPanel.hidden;
+      });
+      document.getElementById('logoUploadBtn').addEventListener('mousedown', (e) => e.preventDefault());
+      document.getElementById('logoUploadBtn').addEventListener('click', () => {
+        logoPanel.hidden = true;
+        document.getElementById('logoInput').click();
+      });
+      document.addEventListener('click', (e) => {
+        if (!logoPicker.contains(e.target)) logoPanel.hidden = true;
+      });
+
+      document.getElementById('logoInput').addEventListener('change', (e) => {
+        const f = e.target.files[0]; if (!f) return;
+        readImage(f, (data) => { insertLogoAtCursor(data); });
+        e.target.value = '';
+      });
+
+      /* ---------- 模板结构注册表 ----------
+         各模板 body 只提供「结构骨架 + 中性占位」，不写具体人名/链接/方向等内容。
+         切换模板时 applyFields 会按 data-field 迁移用户已有内容；模板独有的字段
+         （如 tech 的 meta / links）若用户没有对应内容，占位文字应可一眼识别为
+         待填写，不能是某个具体人的真实信息。 */
+      const techBody = `
+        <header class="resume-head">
+          <h1 data-field="name">姓名</h1>
+          <div class="contact" data-field="contact">电话　|　邮箱　|　城市</div>
+          <div class="meta" data-field="meta"><strong>年龄 · 目标岗位方向 · 毕业年份</strong></div>
+          <div class="meta" data-field="links">GitHub / 个人主页 / 技术博客等公开作品链接</div>
+          <div class="meta" data-field="edu-line">学历 · 学校 · 专业 · 起止时间　|　GPA　|　专业排名</div>
+          <div class="photo" data-field="photo" contenteditable="false" title="点击上传照片" style="display:none;">照片</div>
+        </header>
+        <div class="summary-line" data-field="summary-line">一句话技术定位：你专注的方向 + 最能证明能力的抓手</div>
+        <section class="section" data-field="education"></section>
+        <section class="section" data-field="experience"></section>
+        <section class="section" data-field="projects"></section>
+        <section class="section" data-field="skills"></section>
+        <section class="section" data-field="summary"></section>`;
+
+      const minimalBody = `
+        <header class="resume-head">
+          <div class="head-main" style="text-align:center;">
+            <h1 data-field="name" style="text-align:center;">姓名</h1>
+            <div class="contact" data-field="contact" style="text-align:center;"></div>
+          </div>
+          <div class="photo" data-field="photo" contenteditable="false" title="点击上传照片">照片</div>
+        </header>
+        <section class="section" data-field="education"></section>
+        <section class="section" data-field="experience"></section>
+        <section class="section" data-field="projects"></section>
+        <section class="section" data-field="skills"></section>
+        <section class="section" data-field="summary"></section>`;
+
+      const blockBody = `
+        <header class="resume-head" style="position:relative; display:flex; flex-direction:column; align-items:center; padding-right:26mm;">
+          <div class="photo" data-field="photo" contenteditable="false" title="点击上传照片" style="position:absolute; top:0; right:0;">照片</div>
+          <div class="objective" data-field="objective" style="text-align:center; font-weight:700; font-size:11pt; margin: 0 0 4px;"></div>
+          <h1 data-field="name" style="text-align:center; font-size:18pt; margin: 4px 0;">姓名</h1>
+          <div class="contact" data-field="contact" style="text-align:center;"></div>
+        </header>
+        <section class="section" data-field="education"></section>
+        <section class="section" data-field="experience"></section>
+        <section class="section" data-field="projects"></section>
+        <section class="section" data-field="skills"></section>
+        <section class="section" data-field="summary"></section>`;
+
+      const cornerBody = `
+        <header class="resume-head">
+          <div class="head-main">
+            <h1 data-field="name">姓名</h1>
+            <div class="objective" data-field="objective">求职意向：目标岗位</div>
+            <div class="contact" data-field="contact">电话　|　邮箱　|　城市</div>
+          </div>
+          <div class="photo" data-field="photo" contenteditable="false" title="点击上传照片">照片</div>
+        </header>
+        <section class="section" data-field="education">
+          <h2 class="section-title">教育背景</h2>
+        </section>
+        <section class="section" data-field="experience">
+          <h2 class="section-title">实习经历</h2>
+        </section>
+        <section class="section" data-field="projects">
+          <h2 class="section-title">项目经历</h2>
+        </section>
+        <section class="section" data-field="skills">
+          <h2 class="section-title">技能证书</h2>
+        </section>
+        <section class="section" data-field="summary">
+          <h2 class="section-title">自我评价</h2>
+        </section>`;
+
+      // 中英标题：英文副标题由 CSS 的 ::after 按 data-field 生成，
+      // 这里不写 <span class="en">，否则切换模板时会被 applyFields 覆盖掉
+      const bilingualBody = `
+        <header class="resume-head">
+          <div class="head-main">
+            <h1 data-field="name">姓名</h1>
+            <div class="objective" data-field="objective">求职意向：目标岗位</div>
+            <div class="contact" data-field="contact">电话　|　邮箱　|　城市</div>
+          </div>
+          <div class="photo" data-field="photo" contenteditable="false" title="点击上传照片">照片</div>
+        </header>
+        <section class="section" data-field="education">
+          <h2 class="section-title">教育背景</h2>
+        </section>
+        <section class="section" data-field="experience">
+          <h2 class="section-title">实习经历</h2>
+        </section>
+        <section class="section" data-field="projects">
+          <h2 class="section-title">项目经历</h2>
+        </section>
+        <section class="section" data-field="skills">
+          <h2 class="section-title">其他技能</h2>
+        </section>
+        <section class="section" data-field="summary">
+          <h2 class="section-title">个人评价</h2>
+        </section>`;
+
+      const doubleBody = `
+        <div class="two-col">
+          <aside class="col-left">
+            <div class="photo" data-field="photo" contenteditable="false" title="点击上传照片">照片</div>
+            <h1 data-field="name">姓名</h1>
+            <div class="contact" data-field="contact"></div>
+            <section class="section" data-field="education"></section>
+            <section class="section" data-field="skills"></section>
+          </aside>
+          <div class="col-right">
+            <div class="objective" data-field="objective"></div>
+            <section class="section" data-field="experience"></section>
+            <section class="section" data-field="projects"></section>
+            <section class="section" data-field="summary"></section>
+          </div>
+        </div>`;
+
+      const templates = {
+        single:   { label: '标准单栏',       body: null },
+        double:   { label: '左右双栏',       body: doubleBody },
+        tech:     { label: '无照片项目型',   body: techBody },
+        minimal:  { label: '居中黑白',       body: minimalBody },
+        block:    { label: '灰底标题',       body: blockBody },
+        corner:   { label: '左侧虚线',       body: cornerBody },
+        bilingual:{ label: '中英标题',       body: bilingualBody }
+      };
+      templates.single.body = sheet.innerHTML;   // 初始 HTML 即单栏模板
+      let currentLayout = 'single';
+
+      const extractFields = (root) => {
+        const map = {};
+        root.querySelectorAll('[data-field]').forEach(el => { map[el.dataset.field] = el.innerHTML; });
+        return map;
+      };
+      const applyFields = (root, map) => {
+        root.querySelectorAll('[data-field]').forEach(el => {
+          if (map[el.dataset.field] !== undefined) el.innerHTML = map[el.dataset.field];
+        });
+      };
+
+      // 切到非 bilingual 模板时，剥除 .en 英文 span（保留中文）
+      const stripEnSpans = (html) => html.replace(/<span class="en"[^>]*>([\s\S]*?)<\/span>/g, '$1');
+
+      document.getElementById('layout').addEventListener('change', (e) => {
+        const key = e.target.value;
+        if (key === currentLayout) return;
+        commit();
+        const content = extractFields(sheet);
+        if (key !== 'bilingual') {
+          Object.keys(content).forEach(k => { content[k] = stripEnSpans(content[k]); });
+        }
+        sheet.innerHTML = templates[key].body;
+        sheet.dataset.template = key;
+        applyFields(sheet, content);
+        currentLayout = key;
+        lastRange = null;
+        commit();
+        scheduleSave();
+        scheduleGuides();
+      });
+
+      /* ---------- 配色主题 ---------- */
+      document.getElementById('theme').addEventListener('change', (e) => {
+        document.documentElement.setAttribute('data-theme', e.target.value);
+      });
+
+      /* 首次渲染 + 窗口尺寸变化时刷新分页线 */
+      window.addEventListener('load', updatePageGuides);
+      window.addEventListener('resize', scheduleGuides);
+      scheduleGuides();
+
+      /* ---------- 矢量 PDF 导出（jsPDF 手动排版，文字可选中、非截图） ---------- */
+      (() => {
+        const PT_PER_MM = 72 / 25.4, MM_PER_PX = 25.4 / 96;
+        const cache = { normal: null, bold: null };
+
+        const ab2b64 = (buf) => {
+          const bytes = new Uint8Array(buf); let s = '';
+          for (let i = 0; i < bytes.length; i += 8192) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 8192));
+          return btoa(s);
+        };
+        const loadFont = async (url) => {
+          const isBold = url.indexOf('font-bold') >= 0;
+          if (isBold && cache.bold) return cache.bold;
+          if (!isBold && cache.normal) return cache.normal;
+          const r = await fetch(url);
+          if (!r.ok) throw new Error('字体加载失败：' + url);
+          const b64 = ab2b64(await r.arrayBuffer());
+          if (isBold) cache.bold = b64; else cache.normal = b64;
+          return b64;
+        };
+        const parseColor = (s) => {
+          if (!s) return { r: 26, g: 26, b: 26 };
+          s = s.trim();
+          if (s[0] === '#') { let h = s.slice(1); if (h.length === 3) h = h.split('').map(c => c + c).join(''); return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16) }; }
+          const m = s.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
+          if (m) return { r: +m[1], g: +m[2], b: +m[3] };
+          return { r: 26, g: 26, b: 26 };
+        };
+        const tokenize = (t) => {
+          const out = []; let ascii = '';
+          for (const ch of t) {
+            if (ch >= ' ' && ch <= '~') ascii += ch;
+            else { if (ascii) { out.push(ascii); ascii = ''; } out.push(ch); }
+          }
+          if (ascii) out.push(ascii);
+          return out;
+        };
+        const svgToPng = (src, height) => new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            const ratio = (img.naturalWidth || 1) / (img.naturalHeight || 1);
+            const w = Math.max(1, Math.round(height * ratio));
+            const c = document.createElement('canvas');
+            c.width = w; c.height = height;
+            c.getContext('2d').drawImage(img, 0, 0, w, height);
+            try { resolve(c.toDataURL('image/png')); } catch (err) { resolve(src); }
+          };
+          img.onerror = () => resolve(src);
+          img.src = src;
+        });
+
+        // 把生成好的 PDF 交付给用户。
+        // 宿主环境差异很大：真浏览器支持 <a download> 下载；IDE/AI 工具的 webview
+        // 常常拦掉下载且不报错（点了没反应）。所以依次尝试多条通道。
+        const savePdfWithFallback = (doc, filename) => {
+          // 通道 1：标准下载（真浏览器）
+          try {
+            doc.save(filename);
+            flash('已导出 PDF，请查看下载目录');
+            return;
+          } catch (e) { /* 继续尝试下一通道 */ }
+
+          const blob = doc.output('blob');
+          const url = URL.createObjectURL(blob);
+
+          // 通道 2：新窗口打开 PDF，用户可在预览里另存
+          try {
+            const win = window.open(url, '_blank');
+            if (win) {
+              flash('已在新窗口打开 PDF，可在预览中保存');
+              setTimeout(() => URL.revokeObjectURL(url), 60000);
+              return;
+            }
+          } catch (e) { /* 继续 */ }
+
+          // 通道 3：手动触发 <a download>（部分 webview 支持）
+          try {
+            const a = document.createElement('a');
+            a.href = url; a.download = filename;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            flash('已尝试下载 PDF，若无反应请用「打印为 PDF」');
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+            return;
+          } catch (e) { /* 继续 */ }
+
+          // 通道 4：全部失败，引导用户走系统打印（webview 通常支持）
+          URL.revokeObjectURL(url);
+          flash('当前环境不支持直接下载，请点「打印为 PDF」');
+        };
+
+        window.exportVectorPDF = async function () {
+          if (typeof window.jspdf === 'undefined') { flash('矢量导出组件未就绪，请改用「打印为 PDF」'); return; }
+          const btn = document.getElementById('exportBtn');
+          const oldText = btn.textContent;
+          btn.disabled = true; btn.textContent = '生成中…';
+          let svgBackup = [];
+          try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            const rootCs = getComputedStyle(document.documentElement);
+            const theme = {
+              brand: parseColor(rootCs.getPropertyValue('--brand').trim()),
+              brandDark: parseColor(rootCs.getPropertyValue('--brand-dark').trim()),
+              accent: parseColor(rootCs.getPropertyValue('--accent').trim()),
+              text: parseColor(rootCs.getPropertyValue('--text').trim()),
+              muted: parseColor(rootCs.getPropertyValue('--muted').trim()),
+              band: parseColor(rootCs.getPropertyValue('--band').trim())
+            };
+
+            // 注册两套中文字体，渲染时按元素实际的 font-family 选用，
+            // 保证 PDF 与网页字体一致。
+            // 注意：字体名不能用 'sans' / 'serif' —— 它们是 jsPDF 内置标准字体
+            // （helvetica / times）的别名，setFont 时会被解析成内置 Latin 字体，
+            // 中文按 Latin1 输出就会整片乱码。这里用 CJKSans / CJKSerif。
+            const PDF_FAMILY = { sans: 'CJKSans', serif: 'CJKSerif' };
+            for (const key of ['sans', 'serif']) {
+              const name = PDF_FAMILY[key];
+              const reg = await loadFont(key, false);
+              const bold = await loadFont(key, true);
+              doc.addFileToVFS(name + '.ttf', reg);
+              doc.addFont(name + '.ttf', name, 'normal');
+              doc.addFileToVFS(name + 'B.ttf', bold);
+              doc.addFont(name + 'B.ttf', name, 'bold');
+            }
+            // 诊断：把 jsPDF 实际注册成功的字体列出来，便于排查字体不生效问题
+            console.log('[PDF] 已注册字体:', Object.keys(doc.getFontList()));
+            console.log('[PDF] CJKSerif 变体:', doc.getFontList()['CJKSerif']);
+            console.log('[PDF] CJKSans 变体:', doc.getFontList()['CJKSans']);
+
+            const template = sheet.dataset.template || 'single';
+            const pageW = 210, pageH = 297;
+            const mT = 9, mB = 10;
+            let mL = 11, mR = 11;
+            if (template === 'corner') mL = 18;
+            const x0 = mL, maxW = pageW - mL - mR;
+            let currentPage = 1;
+
+            // CSS font-family → PDF 已注册的字体名（CJKSans / CJKSerif）。
+            // 宋体/楷体等衬线族走宋体，其余走黑体。
+            const pickFamily = (cssFamily) => {
+              const f = (cssFamily || '').toLowerCase();
+              // sans-serif 含 "serif" 子串，先剔除再判断
+              const cleaned = f.replace(/sans-serif/g, '');
+              const picked = /songti|simsun|宋体|stsong|kaiti|楷体|serif|times|georgia|fangsong|仿宋/.test(cleaned)
+                ? PDF_FAMILY.serif : PDF_FAMILY.sans;
+              if (!pickFamily._logged) {
+                pickFamily._logged = {};
+              }
+              if (!pickFamily._logged[f]) {
+                pickFamily._logged[f] = picked;
+                console.log('[PDF] font-family 映射:', JSON.stringify(cssFamily), '→', picked);
+              }
+              return picked;
+            };
+
+            const setFont = (s) => {
+              doc.setFont(s.family || PDF_FAMILY.sans, s.bold ? 'bold' : 'normal');
+              doc.setFontSize(s.size);
+              doc.setTextColor(s.color.r, s.color.g, s.color.b);
+            };
+            const imgFormat = (src) => (/data:image\/(jpe?g)/i.test(src) ? 'JPEG' : (/data:image\/webp/i.test(src) ? 'WEBP' : 'PNG'));
+            const ensure = (y, need) => (y + need > pageH - mB) ? (doc.addPage(), currentPage++, mT) : y;
+
+            const readBlock = (el) => {
+              const cs = getComputedStyle(el);
+              const sizePx = parseFloat(cs.fontSize) || 10.5;
+              const lh = parseFloat(cs.lineHeight);
+              const size = sizePx * 0.75;
+              return {
+                size, bold: parseInt(cs.fontWeight, 10) >= 600, italic: cs.fontStyle === 'italic',
+                color: parseColor(cs.color),
+                family: pickFamily(cs.fontFamily),
+                align: cs.textAlign === 'center' ? 'center' : (cs.textAlign === 'right' ? 'right' : 'left'),
+                lhRatio: isNaN(lh) ? 1.4 : (lh / sizePx),
+                mt: (parseFloat(cs.marginTop) || 0) * MM_PER_PX,
+                mb: (parseFloat(cs.marginBottom) || 0) * MM_PER_PX,
+                letter: (parseFloat(cs.letterSpacing) || 0) * MM_PER_PX
+              };
+            };
+            const readInline = (el) => {
+              const cs = getComputedStyle(el);
+              const sizePx = parseFloat(cs.fontSize) || 10.5;
+              return {
+                size: sizePx * 0.75,
+                bold: parseInt(cs.fontWeight, 10) >= 600,
+                italic: cs.fontStyle === 'italic',
+                color: parseColor(cs.color),
+                family: pickFamily(cs.fontFamily)
+              };
+            };
+            const collectRuns = (node, base, runs) => {
+              node.childNodes.forEach(child => {
+                if (child.nodeType === 3) {
+                  const t = child.textContent.replace(/[\r\n\t]+/g, ' ');
+                  if (t.trim()) runs.push({ text: t, bold: base.bold, italic: base.italic, size: base.size, color: base.color, family: base.family });
+                } else if (child.nodeType === 1) {
+                  const tag = child.tagName;
+                  if (tag === 'IMG') { runs.push({ img: child }); return; }
+                  if (tag === 'BR') { runs.push({ br: true }); return; }
+                  const st = readInline(child);
+                  if (tag === 'STRONG' || tag === 'B') st.bold = true;
+                  if (tag === 'I' || tag === 'EM') st.italic = true;
+                  collectRuns(child, st, runs);
+                }
+              });
+            };
+
+            // ---- margin 折叠（对齐浏览器 CSS 语义）----
+            // 浏览器里相邻兄弟的 margin-bottom 与 margin-top 取最大值（不是相加）。
+            // PDF 逐块累加 y 时必须模拟这个行为，否则每个块之间都会偏大。
+            // pendingMB 记录上一个块遗留的 margin-bottom，下一个块用
+            // max(pendingMB, 自己的 marginTop) 作为实际间距。
+            let pendingMB = 0;
+            const applyMarginTop = (mt) => {
+              const gap = Math.max(pendingMB, mt);
+              pendingMB = 0;
+              return gap;
+            };
+
+            // 渲染一段富文本块，返回新的 y
+            const renderRuns = (runs, x, maxW, y, base) => {
+              const lineH = base.size * base.lhRatio / PT_PER_MM;
+              // 首行基线 = 块顶 + (行高 - 字高)/2 + ascent，近似 ascent≈0.78em
+              const firstBaseline = y + (lineH - base.size / PT_PER_MM) / 2
+                                      + base.size * 0.78 / PT_PER_MM;
+              let cx = x, cy = firstBaseline;
+              doc.setCharSpace(base.letter || 0);
+              runs.forEach(run => {
+                if (run.br) { cx = x; cy += lineH; return; }
+                if (run.img) {
+                  const im = run.img;
+                  const h = 3.8, w = h * ((im.naturalWidth || 1) / (im.naturalHeight || 1));
+                  doc.addImage(im.src, imgFormat(im.src), cx, cy - h * 0.8, w, h);
+                  cx += w + 1; return;
+                }
+                setFont(run);
+                for (const tk of tokenize(run.text)) {
+                  const w = doc.getTextWidth(tk);
+                  if (cx > x && cx + w > x + maxW) { cx = x; cy += lineH; }
+                  doc.text(tk, cx, cy);
+                  cx += w;
+                }
+              });
+              doc.setCharSpace(0);
+              // 块底 = 最后一行基线 + 该行剩余的下半部分（行高 - ascent 部分）
+              return cy - base.size * 0.78 / PT_PER_MM
+                        + (lineH + base.size / PT_PER_MM) / 2;
+            };
+            const renderText = (el, x, maxW, y) => {
+              const base = readBlock(el);
+              y += applyMarginTop(base.mt);
+              const runs = [];
+              collectRuns(el, base, runs);
+              const lineH = base.size * base.lhRatio / PT_PER_MM;
+              if (base.align === 'center' && runs.length === 1 && runs[0].text && !runs[0].img) {
+                setFont(base); const tw = doc.getTextWidth(runs[0].text);
+                const bl = y + (lineH - base.size / PT_PER_MM) / 2
+                             + base.size * 0.78 / PT_PER_MM;
+                doc.text(runs[0].text, x + (maxW - tw) / 2, bl);
+                pendingMB = base.mb;
+                return y + lineH;
+              }
+              const out = renderRuns(runs, x, maxW, y, base);
+              pendingMB = base.mb;
+              return out;
+            };
+
+            // 区块标题：按模板画装饰 + 文字
+            const renderSectionTitle = (el, x, maxW, y) => {
+              const st = readBlock(el);
+              y += applyMarginTop(st.mt);
+              // 排除被 CSS 隐藏的旧版 <span class="en">，避免 PDF 里英文重复
+              const text = Array.from(el.childNodes)
+                .filter(n => !(n.nodeType === 1 && n.classList && n.classList.contains('en')))
+                .map(n => n.textContent).join('').trim();
+              const size = st.size;
+              const lineH = size * (st.lhRatio || 1.2) / PT_PER_MM;
+              // 高度对齐 CSS：line-height + padding-top/bottom（不再硬编码 +4mm）
+              const csT = getComputedStyle(el);
+              const padT = (parseFloat(csT.paddingTop) || 0) * MM_PER_PX;
+              const padB = (parseFloat(csT.paddingBottom) || 0) * MM_PER_PX;
+              const h = lineH + padT + padB;
+              // 中英标题模板的英文副标是 CSS ::after 生成的，textContent 取不到，
+              // 需单独读伪元素的 content 与样式一起绘制
+              const afterCs = getComputedStyle(el, '::after');
+              let enText = '';
+              if (afterCs && afterCs.content && afterCs.content !== 'none') {
+                enText = afterCs.content.replace(/^["']|["']$/g, '');
+                if (enText === 'normal') enText = '';
+              }
+              const enStyle = enText ? {
+                size: (parseFloat(afterCs.fontSize) || 14) * 0.75,
+                color: parseColor(afterCs.color),
+                family: pickFamily(afterCs.fontFamily),
+                italic: afterCs.fontStyle === 'italic',
+                bold: parseInt(afterCs.fontWeight, 10) >= 600,
+                ml: (parseFloat(afterCs.marginLeft) || 0) * MM_PER_PX
+              } : null;
+              doc.setFont(st.family || PDF_FAMILY.sans, 'bold'); doc.setFontSize(size);
+
+              if (template === 'corner') {
+                const tw = doc.getTextWidth(text);
+                const w = tw + 14, notch = 2.6;
+                doc.setFillColor(theme.brand.r, theme.brand.g, theme.brand.b);
+                doc.triangle(x, y + h / 2, x + notch, y, x + notch, y + h, 'F');
+                doc.triangle(x + w, y + h / 2, x + w - notch, y, x + w - notch, y + h, 'F');
+                doc.rect(x + notch, y, w - 2 * notch, h, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.text(text, x + notch + 6, y + h / 2, { baseline: 'middle' });
+                pendingMB = st.mb;
+                return y + h;
+              }
+
+              let textX = x;
+              let color = theme.brand;
+              if (template === 'minimal') color = parseColor('#1a1a1a');
+              if (template === 'block') {
+                doc.setFillColor(241, 243, 245); doc.rect(x, y, maxW, h, 'F');
+                doc.setFillColor(theme.brand.r, theme.brand.g, theme.brand.b); doc.rect(x, y, 1.05, h, 'F');
+                textX = x + 2.5; color = parseColor('#1a1a1a');
+              } else {
+                doc.setDrawColor(color.r, color.g, color.b);
+                doc.setLineWidth(template === 'minimal' ? 0.25 : 0.4);
+                // 下边线位置 = 文字行底 + CSS 的 padding-bottom（原来硬编码 1.5mm）
+                doc.line(x, y + padT + lineH + padB, x + maxW, y + padT + lineH + padB);
+              }
+              if (template === 'minimal') { const tw = doc.getTextWidth(text); textX = x + (maxW - tw) / 2; }
+              doc.setTextColor(color.r, color.g, color.b);
+              doc.text(text, textX, y + padT + lineH, { baseline: 'bottom' });
+              // 英文副标题（CSS ::after 生成）跟在中文标题右侧
+              if (enStyle) {
+                const zhW = doc.getTextWidth(text);
+                doc.setFont(enStyle.family, enStyle.bold ? 'bold' : 'normal');
+                doc.setFontSize(enStyle.size);
+                doc.setTextColor(enStyle.color.r, enStyle.color.g, enStyle.color.b);
+                doc.text(enText, textX + zhW + enStyle.ml, y + padT + lineH, { baseline: 'bottom' });
+              }
+              pendingMB = st.mb;
+              return y + h;
+            };
+
+            // 公司条：三列布局 + 底纹
+            const renderCompany = (el, x, maxW, y) => {
+              const st = readBlock(el);
+              y += applyMarginTop(st.mt);
+              const nameEl = el.querySelector('.company-name');
+              const roleEl = el.querySelector('.company-role');
+              const metaEl = el.querySelector('.company-meta');
+              const hasBand = ['single', 'corner', 'bilingual', 'block'].indexOf(template) >= 0 && template !== 'block';
+              // 高度与下边距全部对齐 CSS：font-size × line-height + padding，
+              // 下边距用 .company 自己的 margin-bottom，不再硬编码
+              const csC = getComputedStyle(el);
+              const nameCs = nameEl ? getComputedStyle(nameEl) : csC;
+              const nameSize = (parseFloat(nameCs.fontSize) || 14.7) * 0.75;
+              const nameLhRaw = parseFloat(nameCs.lineHeight);
+              const nameLh = isNaN(nameLhRaw)
+                ? 1.5
+                : nameLhRaw / (parseFloat(nameCs.fontSize) || 14.7);
+              const lineH = nameSize * nameLh / PT_PER_MM;
+              const padVC = ((parseFloat(csC.paddingTop) || 0)
+                           + (parseFloat(csC.paddingBottom) || 0)) * MM_PER_PX;
+              const h = lineH + padVC;
+              if (hasBand) { doc.setFillColor(theme.band.r, theme.band.g, theme.band.b); doc.roundedRect(x, y, maxW, h, 1.2, 1.2, 'F'); }
+              const mid = y + h / 2;
+              let cx = x + 2;
+              if (nameEl) {
+                const runs = []; collectRuns(nameEl, readBlock(nameEl), runs);
+                doc.setCharSpace(0);
+                runs.forEach(run => {
+                  if (run.img) { const im = run.img; const ih = 3.8, iw = ih * ((im.naturalWidth || 1) / (im.naturalHeight || 1)); doc.addImage(im.src, imgFormat(im.src), cx, mid - ih * 0.5, iw, ih); cx += iw + 1.2; return; }
+                  setFont(run);
+                  for (const tk of tokenize(run.text)) { const w = doc.getTextWidth(tk); doc.text(tk, cx, mid, { baseline: 'middle' }); cx += w; }
+                });
+              }
+              if (roleEl) {
+                // 对齐 CSS 的 .company { gap: 8px }：name 与 role 之间要留间隙
+                cx += (parseFloat(csC.columnGap || csC.gap) || 0) * MM_PER_PX;
+                const runs = []; collectRuns(roleEl, readBlock(roleEl), runs);
+                runs.forEach(run => { if (run.img) return; setFont(run); for (const tk of tokenize(run.text)) { const w = doc.getTextWidth(tk); doc.text(tk, cx, mid, { baseline: 'middle' }); cx += w; } });
+              }
+              if (metaEl) {
+                const runs = []; collectRuns(metaEl, readBlock(metaEl), runs);
+                const total = runs.reduce((a, r) => a + (r.img ? 4 : doc.getTextWidth(r.text || '')), 0);
+                let rx = x + maxW - 2 - total;
+                runs.forEach(run => { if (run.img) return; setFont(run); doc.text(run.text, rx, mid, { baseline: 'middle' }); rx += doc.getTextWidth(run.text); });
+              }
+              pendingMB = st.mb;
+              return y + h;
+            };
+
+            // 列表：项目符号 + 富文本
+            const renderList = (el, x, maxW, y) => {
+              const base = readBlock(el);
+              y += applyMarginTop(base.mt);
+              doc.setFont(base.family || PDF_FAMILY.sans, 'normal'); doc.setFontSize(base.size); doc.setTextColor(base.color.r, base.color.g, base.color.b);
+              // 缩进对齐浏览器：ul 的 margin-left/padding-left 是「文字左边界」的位置，
+              // 而圆点默认画在文字左侧的外面（list-style-position: outside），
+              // 所以圆点圆心要比文字左边界再往左退约一个圆点位。
+              const csUl = getComputedStyle(el);
+              const textIndent = ((parseFloat(csUl.marginLeft) || 0)
+                                + (parseFloat(csUl.paddingLeft) || 0)) * MM_PER_PX;
+              const dotR = base.size * 0.075 / PT_PER_MM;   // 圆点半径，约 0.075em
+              const contentX = x + textIndent;
+              const dotCX = contentX - dotR * 2.6;           // 圆心：文字左侧外
+              let prevLiMB = 0;
+              Array.prototype.forEach.call(el.children, li => {
+                if (li.tagName !== 'LI') return;
+                const runs = []; collectRuns(li, base, runs);
+                const lineH = base.size * base.lhRatio / PT_PER_MM;
+                const liCs = getComputedStyle(li);
+                const liMT = (parseFloat(liCs.marginTop) || 0) * MM_PER_PX;
+                const liMB = (parseFloat(liCs.marginBottom) || 0) * MM_PER_PX;
+                // li 之间的间距同样折叠：max(上一条的 mb, 本条的 mt)
+                y += Math.max(prevLiMB, liMT);
+                // 首行基线与 renderRuns 用同一套换算，保证 bullet 与正文行距一致
+                const baseline = y + (lineH - base.size / PT_PER_MM) / 2
+                                   + base.size * 0.78 / PT_PER_MM;
+                // 项目符号用矢量圆点而非「•」字符：字符在不同字体里粗细差异大、
+                // 且依赖字体子集包含该字形；矢量圆点粗细可控、与浏览器 disc 更接近。
+                // 圆心垂直对齐小写字母中线（约基线上方 0.28em）
+                doc.setFillColor(base.color.r, base.color.g, base.color.b);
+                doc.circle(dotCX, baseline - base.size * 0.28 / PT_PER_MM, dotR, 'F');
+                let cy = baseline, cx = contentX;
+                doc.setCharSpace(0);
+                runs.forEach(run => {
+                  if (run.br) { cx = contentX; cy += lineH; return; }
+                  if (run.img) return;
+                  setFont(run);
+                  for (const tk of tokenize(run.text)) {
+                    const w = doc.getTextWidth(tk);
+                    if (cx > contentX && cx + w > x + maxW) { cx = contentX; cy += lineH; }
+                    doc.text(tk, cx, cy); cx += w;
+                  }
+                });
+                // 本条 li 的底部 = 最后一行基线回推到行盒底部
+                y = cy - base.size * 0.78 / PT_PER_MM
+                       + (lineH + base.size / PT_PER_MM) / 2;
+                prevLiMB = liMB;
+              });
+              // ul 自己的 margin-bottom 与最后一条 li 的 margin-bottom 折叠
+              pendingMB = Math.max(prevLiMB, base.mb);
+              return y;
+            };
+
+            // 照片：align 支持 'right'（默认，单栏右上角）与 'center'（双栏左列居中）
+            const drawPhoto = (photo, x, maxW, y, pw, ph, align) => {
+              const px = align === 'center' ? x + (maxW - pw) / 2 : x + maxW - pw;
+              doc.setDrawColor(195, 203, 214); doc.setLineWidth(0.4);
+              doc.setLineDashPattern([1.5, 1.2], 0);
+              doc.roundedRect(px, y, pw, ph, 1.5, 1.5, 'S');
+              doc.setLineDashPattern([], 0);
+              const img = photo.querySelector('img');
+              if (img) doc.addImage(img.src, 'JPEG', px, y, pw, ph);
+              else { doc.setFont(PDF_FAMILY.sans, 'normal'); doc.setFontSize(8); doc.setTextColor(152, 162, 179); doc.text('照片', px + pw / 2, y + ph / 2, { baseline: 'middle', align: 'center' }); }
+            };
+
+            // 通用递归（块级）
+            const renderNode = (node, x, maxW, y) => {
+              if (node.nodeType === 3) { const t = node.textContent.trim(); if (t) { const base = { size: 10.5, bold: false, italic: false, color: theme.text, align: 'left', lhRatio: 1.5, letter: 0 }; const runs = [{ text: t, bold: false, italic: false, size: 10.5, color: theme.text }]; return renderRuns(runs, x, maxW, y, base); } return y; }
+              if (node.nodeType !== 1) return y;
+              const cls = node.classList;
+              const tag = node.tagName;
+              if (cls.contains('resume-head')) return renderHeader(node, x, maxW, y);
+              if (cls.contains('two-col')) return renderDouble(node, x, maxW, y);
+              if (cls.contains('section')) return renderSection(node, x, maxW, y);
+              if (cls.contains('section-title')) return renderSectionTitle(node, x, maxW, y);
+              if (cls.contains('company')) return renderCompany(node, x, maxW, y);
+              if (cls.contains('project-title')) return renderText(node, x, maxW, y);
+              if (tag === 'UL') return renderList(node, x, maxW, y);
+              if (cls.contains('photo')) {
+                const csP = getComputedStyle(node);
+                const pw = (parseFloat(csP.width) || 76) * MM_PER_PX;
+                const ph = (parseFloat(csP.height) || 95) * MM_PER_PX;
+                // margin: 0 auto → 居中（双栏左列）；否则右对齐（单栏右上角）
+                const centered = csP.marginLeft === csP.marginRight
+                                 && parseFloat(csP.marginLeft) > 0;
+                drawPhoto(node, x, maxW, y, pw, ph, centered ? 'center' : 'right');
+                // 双栏左列里照片是独立块，需要推进 y；单栏 header 内由 renderHeader 统一处理
+                if (centered) {
+                  return y + ph + (parseFloat(csP.marginBottom) || 0) * MM_PER_PX;
+                }
+                return y;
+              }
+              return renderText(node, x, maxW, y);
+            };
+            const renderHeader = (el, x, maxW, y) => {
+              const y0 = y;
+              const headMain = el.querySelector('.head-main');
+              const photo = el.querySelector('.photo');
+              let contentW = maxW;
+              // 照片尺寸与右侧留白读 CSS，避免与网页不一致
+              let pw = 0, ph = 0;
+              if (photo && template !== 'tech') {
+                const csP = getComputedStyle(photo);
+                pw = (parseFloat(csP.width) || 76) * MM_PER_PX;
+                ph = (parseFloat(csP.height) || 95) * MM_PER_PX;
+                const headGap = (parseFloat(getComputedStyle(el).columnGap
+                                          || getComputedStyle(el).gap) || 0) * MM_PER_PX;
+                drawPhoto(photo, x, maxW, y, pw, ph);
+                contentW = maxW - pw - headGap;
+              }
+              const target = headMain || el;
+              let yy = y;
+              for (const child of target.childNodes) yy = renderNode(child, x, contentW, yy);
+              return Math.max(yy, y0 + ph);
+            };
+            const renderSection = (el, x, maxW, y) => {
+              y = ensure(y, 24);
+              // 对齐 CSS 的 .section { margin-top: 12px }，并与上一个块的
+              // margin-bottom 折叠（浏览器取最大值，不是相加）
+              const csS = getComputedStyle(el);
+              y += applyMarginTop((parseFloat(csS.marginTop) || 0) * MM_PER_PX);
+              const title = el.querySelector(':scope > .section-title');
+              if (title) y = renderSectionTitle(title, x, maxW, y);
+              for (const child of el.childNodes) { if (child === title) continue; y = renderNode(child, x, maxW, y); }
+              pendingMB = Math.max(pendingMB,
+                (parseFloat(csS.marginBottom) || 0) * MM_PER_PX);
+              return y;
+            };
+            const renderDouble = (el, x, maxW, y) => {
+              const colL = el.querySelector('.col-left');
+              const colR = el.querySelector('.col-right');
+              const gap = 4;
+              const lw = maxW * 0.38, rw = maxW - lw - gap;
+              let yl = y;
+              for (const child of colL.childNodes) yl = renderNode(child, x, lw, yl);
+              let yr = y;
+              for (const child of colR.childNodes) yr = renderNode(child, x + lw + gap, rw, yr);
+              return Math.max(yl, yr);
+            };
+
+            // 折角模板：左侧贯穿虚线
+            if (template === 'corner') {
+              doc.setDrawColor(theme.brand.r, theme.brand.g, theme.brand.b);
+              doc.setLineDashPattern([2, 1.5], 0);
+              doc.setLineWidth(0.3);
+              doc.line(12, mT, 12, pageH - mB);
+              doc.setLineDashPattern([], 0);
+            }
+
+            // SVG logo → PNG（jsPDF 不支持直接嵌入 SVG，先栅格化为高清位图）
+            const svgImgs = Array.from(sheet.querySelectorAll('img[src*="image/svg+xml"]'));
+            svgBackup = svgImgs.map(im => ({ im, src: im.getAttribute('src') }));
+            for (const b of svgBackup) b.im.setAttribute('src', await svgToPng(b.src, 96));
+
+            let y = mT;
+            for (const child of sheet.childNodes) {
+              // 跳过屏幕专用的分页参考线容器
+              if (child.nodeType === 1 && child.classList.contains('page-guides')) continue;
+              y = renderNode(child, x0, maxW, y);
+            }
+
+            // 落盘：不同宿主环境能力不同（浏览器 / IDE webview / 内嵌预览面板），
+            // 依次尝试多种通道，成功一个即止
+            savePdfWithFallback(doc, '简历.pdf');
+          } catch (e) {
+            console.error(e);
+            flash('导出失败：' + (e && e.message ? e.message : e));
+          } finally {
+            svgBackup.forEach(b => b.im.setAttribute('src', b.src));
+            btn.disabled = false; btn.textContent = oldText;
+          }
+        };
+      })();
+
+    })();
+  </script>
+</body>
+</html>

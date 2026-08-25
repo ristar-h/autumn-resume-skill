@@ -1,0 +1,13 @@
+本目录内的中文字体均为开源可商用字体：
+
+- font.ttf / font-bold.ttf
+  Source Han Sans CN（思源黑体）
+  SIL Open Font License 1.1
+  https://github.com/adobe-fonts/source-han-sans
+
+- serif.otf / serif-bold.otf
+  Source Han Serif CN（思源宋体）
+  SIL Open Font License 1.1
+  https://github.com/adobe-fonts/source-han-serif
+
+生成 PDF 时脚本会按简历实际用字做子集化后内联，不会分发完整字体文件。
