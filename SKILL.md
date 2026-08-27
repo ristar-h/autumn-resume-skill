@@ -91,7 +91,7 @@ python scripts/build_resume.py --md <润色后md路径> --out <输出html路径>
 ```
 
 **运行环境**：Python 3.8+，需要 `fonttools`（`pip install fonttools`）。
-首次运行会自动从 CDN 下载中文字体与 jsPDF 到 `assets/vendor/` 缓存（约 40MB，仅一次），后续离线可用。
+首次运行会自动从 CDN 下载中文字体与 jsPDF 到 `vendor/` 缓存（约 40MB，仅一次），后续离线可用。
 若下载失败，脚本会打印手动下载地址。
 
 生成后**立即告知用户在系统浏览器中打开**（见下方「交付时必须告知用户」）。
@@ -231,17 +231,18 @@ HTML 里也内置了环境自检：检测到编辑或存储能力不可用时，
 
 ```
 autumn-resume-skill/
-├── SKILL.md                    # 本文件
+├── SKILL.md                        # 本文件
+├── README.md
 ├── knowledge/
 │   ├── 产品岗润色.md
 │   ├── 运营岗润色.md
 │   └── 金融岗润色.md
 ├── scripts/
-│   └── build_resume.py         # md → HTML 生成器
-└── assets/
-    ├── templates/
-    │   └── interactive-resume.html  # HTML 模板（52 公司 + 12 学校 logo 库、7 套样式、导 PDF）
-    └── vendor/                 # 中文字体与 jsPDF，首次运行自动下载缓存（不入版本库）
+│   └── build_resume.py             # md → HTML 生成器
+├── templates/
+│   └── interactive-resume.html     # HTML 模板（52 公司 + 12 学校 logo 库、7 套样式、导 PDF）
+└── vendor/                         # 中文字体与 jsPDF，首次运行自动下载缓存（不入版本库）
 ```
 
+目录保持两级（根目录 / 二级目录 / 文件），不做更深嵌套。
 分发时只有约 700KB（模板 + 知识 + 脚本），字体在首次生成简历时按需下载。

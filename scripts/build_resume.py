@@ -20,8 +20,9 @@ import base64
 import re
 from pathlib import Path
 
-TEMPLATE_HTML = Path(__file__).parent.parent / 'assets/templates/interactive-resume.html'
-VENDOR_DIR = Path(__file__).parent.parent / 'assets/vendor'
+SKILL_ROOT = Path(__file__).resolve().parent.parent
+TEMPLATE_HTML = SKILL_ROOT / 'templates' / 'interactive-resume.html'
+VENDOR_DIR = SKILL_ROOT / 'vendor'
 DEFAULT_TEMPLATE_ID = 'single'
 TEMPLATE_IDS = {'single', 'double', 'tech', 'minimal', 'block', 'corner', 'bilingual'}
 

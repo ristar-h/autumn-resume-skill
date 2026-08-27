@@ -2,8 +2,8 @@
 __pycache__/
 *.pyc
 
-# 字体与 jsPDF 由 scripts/build_resume.py 首次运行时自动下载
-assets/vendor/*.ttf
-assets/vendor/*.otf
-assets/vendor/*.part
-assets/vendor/jspdf.umd.min.js
+# 字体与 jsPDF 由 scripts/build_resume.py 首次运行时自动下载，不入库
+vendor/*.ttf
+vendor/*.otf
+vendor/*.part
+vendor/jspdf.umd.min.js
