@@ -238,11 +238,22 @@ autumn-resume-skill/
 │   ├── 运营岗润色.md
 │   └── 金融岗润色.md
 ├── scripts/
-│   └── build_resume.py             # md → HTML 生成器
+│   ├── build_resume.py             # md → HTML 生成器
+│   └── pack.py                     # 打包成可上传的 zip
 ├── templates/
 │   └── interactive-resume.html     # HTML 模板（52 公司 + 12 学校 logo 库、7 套样式、导 PDF）
 └── vendor/                         # 中文字体与 jsPDF，首次运行自动下载缓存（不入版本库）
 ```
 
 目录保持两级（根目录 / 二级目录 / 文件），不做更深嵌套。
-分发时只有约 700KB（模板 + 知识 + 脚本），字体在首次生成简历时按需下载。
+
+## 打包分发
+
+**不要用系统的右键压缩** —— `vendor/` 里首次运行后会留下约 40MB 字体缓存，直接压缩会让包体超出 3MB 上限。用脚本打包：
+
+```bash
+python scripts/pack.py            # 默认输出到 ~/Downloads
+python scripts/pack.py --out .    # 指定输出目录
+```
+
+脚本会自动剔除字体、jsPDF、`.git`、`__pycache__` 等本地产物，产出约 85KB 的包，并在超限时报错。字体由使用者首次生成简历时自动下载。
