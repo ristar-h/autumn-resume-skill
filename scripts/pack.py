@@ -38,11 +38,66 @@ def should_skip(path, root):
     return False
 
 
+# SKILL.md frontmatter 必填字段
+REQUIRED_FIELDS = ['name', 'version', 'display_name', 'display_name_en',
+                   'description', 'description_zh', 'description_en']
+
+
+def check_frontmatter():
+    """打包前预检 SKILL.md 的 frontmatter，避免打出无法上传的包。
+
+    重点检查裸标量里的「冒号+空格」——YAML 会把它当成新的键值对，
+    报 "mapping values are not allowed in this context"。长描述一律用引号包裹。
+    """
+    import re
+    text = (SKILL_ROOT / 'SKILL.md').read_text(encoding='utf-8')
+    m = re.match(r'^---\r?\n(.*?)\r?\n---', text, re.S)
+    if not m:
+        return ['SKILL.md 缺少 frontmatter（--- 包裹的头部）']
+
+    problems, seen = [], {}
+    for i, line in enumerate(m.group(1).split('\n'), 1):
+        if not line.strip():
+            continue
+        if line[0] in ' \t':
+            problems.append(f'frontmatter 第 {i} 行以空白开头，会被当作续行')
+            continue
+        if ':' not in line:
+            problems.append(f'frontmatter 第 {i} 行缺少冒号')
+            continue
+        key, val = line.split(':', 1)
+        key, val = key.strip(), val.strip()
+        seen[key] = val
+        quoted = (len(val) >= 2 and val[0] == val[-1] and val[0] in '"\'')
+        if not quoted and ': ' in val:
+            problems.append(
+                f'{key} 的值含「冒号+空格」但未加引号，YAML 会解析失败')
+        if val.startswith('"') != val.endswith('"'):
+            problems.append(f'{key} 的双引号不配对')
+
+    for field in REQUIRED_FIELDS:
+        if not seen.get(field):
+            problems.append(f'缺少必填字段 {field}')
+
+    return problems
+
+
 def main():
     ap = argparse.ArgumentParser(description='打包 skill 为 zip')
     ap.add_argument('--out', default=str(Path.home() / 'Downloads'),
                     help='输出目录（默认 ~/Downloads）')
+    ap.add_argument('--skip-check', action='store_true',
+                    help='跳过 frontmatter 预检')
     args = ap.parse_args()
+
+    if not args.skip_check:
+        issues = check_frontmatter()
+        if issues:
+            print('✗ SKILL.md frontmatter 预检未通过：')
+            for it in issues:
+                print(f'  - {it}')
+            raise SystemExit(1)
+        print('✓ frontmatter 预检通过')
 
     out_dir = Path(args.out).expanduser()
     out_dir.mkdir(parents=True, exist_ok=True)
