@@ -1,6 +1,11 @@
 ---
 name: autumn-resume
-description: 帮用户按目标岗位润色简历并产出一份可交互编辑、可导 PDF 的 HTML 简历。当用户上传简历文件（PDF/Word/图片/纯文本），或说"帮我写/润色/优化简历"、"针对这个岗位改改简历"、"我要投 XX 岗，帮我改简历"，或提供简历 + JD 组合时触发。
+version: 1.0.0
+display_name: 秋招简历大结果
+display_name_en: Autumn Resume Booster
+description: 帮用户按目标岗位润色简历并产出一份可交互编辑、可导 PDF 的 HTML 简历。当用户上传简历文件（PDF/Word/图片/纯文本），或说「帮我写/润色/优化简历」「针对这个岗位改改简历」「我要投 XX 岗，帮我改简历」，或提供简历 + JD 组合时触发。
+description_zh: 丢进你的简历（PDF、Word、截图或口述都行），说清目标岗位（产品／运营／GTM／金融），它会按岗位重新组织你的经历，把「做了什么」写成「做了什么判断」。产出是一份 HTML 简历，浏览器打开即可直接编辑：改文字、换字体、切 7 套排版、上传照片、插入公司 logo（内置 52 家公司 + 12 所高校），右下角实时显示 A4 剩余空间。改完一键导出 PDF，所见即所得——字体、颜色、分页与网页完全一致，无损还原。
+description_en: Drop in your resume (PDF, Word, a screenshot, or just describe your experience) and name your target role (Product / Growth & Ops / GTM / Finance). It restructures your experience around that role, turning what you did into what you judged. You get an HTML resume you can edit right in the browser: rewrite copy, change fonts, switch between 7 layouts, upload a photo, insert company logos (52 companies and 12 universities built in), with a live readout showing how much A4 space you have left. Export to PDF in one click, WYSIWYG, with fonts, colors and pagination exactly as they appear on screen.
 ---
 
 # 简历润色与生成 Skill
